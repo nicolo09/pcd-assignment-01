@@ -1,6 +1,9 @@
 package pcd.ass01;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CyclicBarrier;
 
 public class BoidsSimulator {
 
@@ -20,29 +23,40 @@ public class BoidsSimulator {
     }
       
     public void runSimulation() {
+
+        //var numThreads = Runtime.getRuntime().availableProcessors();
+        var numThreads = 2;
+
+        var threadsBarrier = new CyclicBarrier(numThreads);
+        var viewBarrier = new CyclicBarrier(numThreads + 1); // Considering also main thread
+
+        List<Thread> threads = new ArrayList<>();
+
+        for(int i = 0; i < numThreads; i++) {
+            var boids = model.getBoids().subList(i * model.getBoids().size() / numThreads, (i + 1) * model.getBoids().size() / numThreads);
+            var runnable = new UpdateMultipleBoidsRunnable(boids, model, threadsBarrier, viewBarrier);
+            var thread = new Thread(runnable);
+            threads.add(thread);
+        }
+
+        for (var thread : threads) {
+            thread.start();
+        }
+
+        try {
+            viewBarrier.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     	while (true) {
             var t0 = System.currentTimeMillis();
-    		var boids = model.getBoids();
-    		/*
-    		for (Boid boid : boids) {
-                boid.update(model);
-            }
-            */
-    		
-    		/* 
-    		 * Improved correctness: first update velocities...
-    		 */
-    		for (Boid boid : boids) {
-                boid.updateVelocity(model);
-            }
 
-    		/* 
-    		 * ..then update positions
-    		 */
-    		for (Boid boid : boids) {
-                boid.updatePos(model);
+            try {
+                viewBarrier.await();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
             
     		if (view.isPresent()) {
             	view.get().update(framerate);
@@ -53,12 +67,20 @@ public class BoidsSimulator {
                 if (dtElapsed < framratePeriod) {		
                 	try {
                 		Thread.sleep(framratePeriod - dtElapsed);
-                	} catch (Exception ex) {}
+                	} catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 	framerate = FRAMERATE;
                 } else {
                 	framerate = (int) (1000/dtElapsed);
                 }
     		}
+
+            try {
+                viewBarrier.await();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             
     	}
     }
