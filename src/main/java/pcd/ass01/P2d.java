@@ -28,4 +28,13 @@ public record P2d(double x, double y) {
         return "P2d("+x+","+y+")";
     }
 
+    @Override
+    public boolean equals(Object o){
+        if (o instanceof P2d){
+            P2d p = (P2d)o;
+            return x == p.x && y == p.y;
+        }
+        return false;
+    }
+
 }

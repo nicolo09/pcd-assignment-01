@@ -24,8 +24,7 @@ public class BoidsSimulator {
       
     public void runSimulation() {
 
-        //var numThreads = Runtime.getRuntime().availableProcessors();
-        var numThreads = 2;
+        var numThreads = Runtime.getRuntime().availableProcessors() + 1;
 
         var threadsBarrier = new CyclicBarrier(numThreads);
         var viewBarrier = new CyclicBarrier(numThreads + 1); // Considering also main thread

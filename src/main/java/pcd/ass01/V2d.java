@@ -37,5 +37,14 @@ public record V2d(double x,double y) {
     public String toString(){
         return "V2d("+x+","+y+")";
     }
+
+    @Override
+    public boolean equals(Object o){
+        if (o instanceof V2d){
+            V2d v = (V2d)o;
+            return x == v.x && y == v.y;
+        }
+        return false;
+    }
     
 }

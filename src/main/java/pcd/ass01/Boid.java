@@ -84,10 +84,6 @@ public class Boid {
         V2d alignment = calculateAlignment(nearbyBoids, model);
         V2d cohesion = calculateCohesion(nearbyBoids, model);
 
-        vel = vel;
-
-        System.out.println("vel: " + vel);
-
         vel = vel.sum(alignment.mul(model.getAlignmentWeight()))
                 .sum(separation.mul(model.getSeparationWeight()))
                 .sum(cohesion.mul(model.getCohesionWeight()));
@@ -115,18 +111,13 @@ public class Boid {
             pos = pos.sum(new V2d(0, model.getHeight()));
         if (pos.y() >= model.getMaxY())
             pos = pos.sum(new V2d(0, -model.getHeight()));
-
-        if (Double.isNaN(pos.x()) && Double.isNaN(pos.y())) {
-            System.out.println("NAN");
-        }
         
-
     }
 
     private List<Boid> getNearbyBoids(BoidsModel model) {
         var list = new ArrayList<Boid>();
         for (Boid other : model.getBoids()) {
-            if (other != this) {
+            if (!other.equals(this)) {
                 P2d otherPos = other.getPos();
                 double distance = pos.distance(otherPos);
                 if (distance < model.getPerceptionRadius()) {
@@ -190,6 +181,16 @@ public class Boid {
             return new V2d(dx, dy).getNormalized();
         } else {
             return new V2d(0, 0);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Boid) {
+            Boid other = (Boid) o;
+            return pos.equals(other.getPos()) && vel.equals(other.getVel());
+        } else {
+            return false;
         }
     }
 }
