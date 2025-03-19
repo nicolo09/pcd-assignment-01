@@ -5,12 +5,22 @@ import java.util.List;
 
 public class Boid {
 
+    static int idsCounter = 0;
+
     private P2d pos;
     private V2d vel;
+    private int id;
 
     public Boid(P2d pos, V2d vel) {
     	this.pos = pos;
     	this.vel = vel;
+        this.id = idsCounter++;
+    }
+
+    public Boid(Boid boid) {
+    	this.pos = new P2d(boid.getPos().x(), boid.getPos().y());
+    	this.vel = new V2d(boid.getVel().x(), boid.getVel().y());
+        this.id = boid.id;
     }
     
     public P2d getPos() {
@@ -95,7 +105,7 @@ public class Boid {
     private List<Boid> getNearbyBoids(BoidsModel model) {
     	var list = new ArrayList<Boid>();
         for (Boid other : model.getBoids()) {
-        	if (other != this) {
+        	if (other.id != this.id) {
         		P2d otherPos = other.getPos();
         		double distance = pos.distance(otherPos);
         		if (distance < model.getPerceptionRadius()) {

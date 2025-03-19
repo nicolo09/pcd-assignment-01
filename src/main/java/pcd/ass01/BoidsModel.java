@@ -2,7 +2,6 @@ package pcd.ass01;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class BoidsModel {
     
@@ -40,7 +39,22 @@ public class BoidsModel {
         	V2d vel = new V2d(Math.random() * maxSpeed/2 - maxSpeed/4, Math.random() * maxSpeed/2 - maxSpeed/4);
         	boids.add(new Boid(pos, vel));
         }
+    }
 
+    public BoidsModel(final BoidsModel boidsModel){
+        separationWeight = boidsModel.separationWeight;
+        alignmentWeight = boidsModel.alignmentWeight;
+        cohesionWeight = boidsModel.cohesionWeight;
+        this.width = boidsModel.width;
+        this.height = boidsModel.height;
+        this.maxSpeed = boidsModel.maxSpeed;
+        this.perceptionRadius = boidsModel.perceptionRadius;
+        this.avoidRadius = boidsModel.avoidRadius;
+        
+        boids = new ArrayList<>();
+        for (Boid boid : boidsModel.boids) {
+        	boids.add(new Boid(boid));
+        }
     }
     
     public synchronized List<Boid> getBoids(){
