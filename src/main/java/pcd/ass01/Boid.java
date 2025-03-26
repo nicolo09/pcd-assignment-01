@@ -5,11 +5,11 @@ import java.util.List;
 
 public class Boid {
 
-    static int idsCounter = 0;
+    private static int idsCounter = 0;
 
+    private final int id;
     private P2d pos;
     private V2d vel;
-    private int id;
 
     public Boid(P2d pos, V2d vel) {
     	this.pos = pos;
