@@ -25,38 +25,18 @@ public class BoidsSimulator {
 
     public void runSimulation() {
         var boids = model.getBoids();
-        
-        List<List<Boid>> threadBoids = ListUtils.partition(boids, boids.size()/Runtime.getRuntime().availableProcessors());
-        
+
+        List<List<Boid>> threadBoids = ListUtils.partition(boids,
+                boids.size() / Runtime.getRuntime().availableProcessors());
         CyclicBarrier barrier = new CyclicBarrier(threadBoids.size() + 1);
-        
-        threadBoids.forEach(boidList -> {
-            new Thread(() -> {
-                while (true) {
-                    var tmpModel = new BoidsModel(model);
-                    try {
-                        barrier.await();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    boidList.forEach(boid -> boid.updateVelocity(tmpModel));
-                    try {
-                        barrier.await();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    boidList.forEach(boid -> boid.updatePos(tmpModel));
-                    try {
-                        barrier.await();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        });
+        List<BoidUpdateRunnable> runnables = threadBoids.stream()
+                .map(boidsList -> new BoidUpdateRunnable(boidsList, barrier)).toList();
+
+        runnables.forEach(runnable -> new Thread(runnable).start());
 
         var t0 = System.currentTimeMillis();
         while (true) {
+            runnables.forEach(runnable -> runnable.setModel(new BoidsModel(model)));
 
             try {
                 barrier.await();
