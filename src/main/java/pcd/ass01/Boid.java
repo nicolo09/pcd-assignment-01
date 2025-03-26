@@ -2,7 +2,6 @@ package pcd.ass01;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CyclicBarrier;
 
 public class Boid {
 
@@ -66,19 +65,11 @@ public class Boid {
             pos = pos.sum(new V2d(0, -model.getHeight()));
     }
 
-    public void updateVelocity(BoidsModel model) {// , CyclicBarrier barrier) {
+    public void updateVelocity(BoidsModel model) {
 
         /* change velocity vector according to separation, alignment, cohesion */
 
         List<Boid> nearbyBoids = getNearbyBoids(model);
-        /*
-         * Waiting all threads to copy current state before updating values
-         * try {
-         * barrier.await();
-         * } catch (Exception e) {
-         * e.printStackTrace();
-         * }
-         */
 
         V2d separation = calculateSeparation(nearbyBoids, model);
         V2d alignment = calculateAlignment(nearbyBoids, model);

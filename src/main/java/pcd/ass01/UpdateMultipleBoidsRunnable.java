@@ -26,7 +26,6 @@ public class UpdateMultipleBoidsRunnable implements Runnable {
             var modelCopy = new BoidsModel(model);
             waitThreads();
 
-            //TODO: uncomment to use
             boids.forEach(boid -> boid.updateVelocity(modelCopy));
             /* Waiting all threads to update velocity */
             waitThreads();
