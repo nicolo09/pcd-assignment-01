@@ -54,7 +54,7 @@ public class BoidsModel {
     	
     	boids = new ArrayList<>();
     	for (Boid boid : model.boids) {
-    		boids.add(new Boid(boid.getPos(), boid.getVel()));
+    		boids.add(new Boid(boid));
     	}
     }
     
