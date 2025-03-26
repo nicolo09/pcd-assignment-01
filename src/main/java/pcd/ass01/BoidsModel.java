@@ -2,7 +2,6 @@ package pcd.ass01;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class BoidsModel {
     
@@ -40,34 +39,49 @@ public class BoidsModel {
         	V2d vel = new V2d(Math.random() * maxSpeed/2 - maxSpeed/4, Math.random() * maxSpeed/2 - maxSpeed/4);
         	boids.add(new Boid(pos, vel));
         }
+    }
 
+    public BoidsModel(final BoidsModel boidsModel){
+        separationWeight = boidsModel.separationWeight;
+        alignmentWeight = boidsModel.alignmentWeight;
+        cohesionWeight = boidsModel.cohesionWeight;
+        this.width = boidsModel.width;
+        this.height = boidsModel.height;
+        this.maxSpeed = boidsModel.maxSpeed;
+        this.perceptionRadius = boidsModel.perceptionRadius;
+        this.avoidRadius = boidsModel.avoidRadius;
+        
+        boids = new ArrayList<>();
+        for (Boid boid : boidsModel.boids) {
+        	boids.add(new Boid(boid));
+        }
     }
     
-    public synchronized List<Boid> getBoids(){
+    public List<Boid> getBoids(){
     	return boids;
     }
     
-    public synchronized double getMinX() {
+    public double getMinX() {
     	return -width/2;
     }
 
-    public synchronized double getMaxX() {
+    public double getMaxX() {
     	return width/2;
     }
 
-    public synchronized double getMinY() {
+    public double getMinY() {
     	return -height/2;
     }
 
-    public synchronized double getMaxY() {
+    public double getMaxY() {
     	return height/2;
     }
     
-    public synchronized double getWidth() {
+    public double getWidth() {
     	return width;
     }
  
-    public synchronized double getHeight() {
+    public double getHeight() {
     	return height;
     }
 
@@ -95,15 +109,15 @@ public class BoidsModel {
     	return alignmentWeight;
     }
     
-    public synchronized double getMaxSpeed() {
+    public double getMaxSpeed() {
     	return maxSpeed;
     }
 
-    public synchronized double getAvoidRadius() {
+    public double getAvoidRadius() {
     	return avoidRadius;
     }
 
-    public synchronized double getPerceptionRadius() {
+    public double getPerceptionRadius() {
     	return perceptionRadius;
     }
 }

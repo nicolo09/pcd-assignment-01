@@ -1,6 +1,11 @@
 package pcd.ass01;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class BoidsSimulator {
 
@@ -20,29 +25,38 @@ public class BoidsSimulator {
     }
       
     public void runSimulation() {
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+1);
+
     	while (true) {
             var t0 = System.currentTimeMillis();
     		var boids = model.getBoids();
-    		/*
-    		for (Boid boid : boids) {
-                boid.update(model);
-            }
-            */
-    		
+            BoidsModel modelCopy = new BoidsModel(model);
+    		    		
     		/* 
     		 * Improved correctness: first update velocities...
     		 */
-    		for (Boid boid : boids) {
-                boid.updateVelocity(model);
-            }
+            List<Future<?>> velocityFutures = new ArrayList<>();
+    		boids.forEach(boid -> velocityFutures.add(executor.submit(() -> boid.updateVelocity(modelCopy))));
+            velocityFutures.forEach(f -> {
+                try {
+                    f.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
 
     		/* 
     		 * ..then update positions
     		 */
-    		for (Boid boid : boids) {
-                boid.updatePos(model);
-            }
-
+            List<Future<?>> posFutures = new ArrayList<>();
+    		boids.forEach(boid -> posFutures.add(executor.submit(() -> boid.updatePos(modelCopy))));
+            posFutures.forEach(f -> {
+                try {
+                    f.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
             
     		if (view.isPresent()) {
             	view.get().update(framerate);
