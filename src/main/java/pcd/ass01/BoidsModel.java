@@ -41,6 +41,22 @@ public class BoidsModel {
         }
 
     }
+
+    public BoidsModel(BoidsModel model) {
+    	this.separationWeight = model.separationWeight;
+    	this.alignmentWeight = model.alignmentWeight;
+    	this.cohesionWeight = model.cohesionWeight;
+    	this.width = model.width;
+    	this.height = model.height;
+    	this.maxSpeed = model.maxSpeed;
+    	this.perceptionRadius = model.perceptionRadius;
+    	this.avoidRadius = model.avoidRadius;
+    	
+    	boids = new ArrayList<>();
+    	for (Boid boid : model.boids) {
+    		boids.add(new Boid(boid.getPos(), boid.getVel()));
+    	}
+    }
     
     public synchronized List<Boid> getBoids(){
     	return boids;
