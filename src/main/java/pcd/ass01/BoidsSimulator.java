@@ -33,8 +33,7 @@ public class BoidsSimulator {
 
         for(int i = 0; i < numThreads; i++) {
             var boids = model.getBoids().subList(i * model.getBoids().size() / numThreads, (i + 1) * model.getBoids().size() / numThreads);
-            var runnable = new UpdateMultipleBoidsRunnable(boids, model, threadsBarrier, viewBarrier);
-            var thread = new Thread(runnable);
+            var thread = new UpdateMultipleBoidsThread(boids, model, threadsBarrier, viewBarrier);
             threads.add(thread);
         }
 

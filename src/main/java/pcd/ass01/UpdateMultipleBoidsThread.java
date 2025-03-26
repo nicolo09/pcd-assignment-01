@@ -3,14 +3,14 @@ package pcd.ass01;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 
-public class UpdateMultipleBoidsRunnable implements Runnable {
+public class UpdateMultipleBoidsThread extends Thread {
 
     private final List<Boid> boids;
     private final BoidsModel model;
     private final CyclicBarrier threadsBarrier;
     private final CyclicBarrier mainBarrier;
 
-    public UpdateMultipleBoidsRunnable(List<Boid> boids, BoidsModel model, CyclicBarrier threadsBarrier, CyclicBarrier mainBarrier) {
+    public UpdateMultipleBoidsThread(List<Boid> boids, BoidsModel model, CyclicBarrier threadsBarrier, CyclicBarrier mainBarrier) {
         this.boids = boids;
         this.model = model;
         this.threadsBarrier = threadsBarrier;
