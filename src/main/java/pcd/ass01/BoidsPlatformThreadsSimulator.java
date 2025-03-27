@@ -6,7 +6,7 @@ import java.util.concurrent.CyclicBarrier;
 
 import org.apache.commons.collections4.ListUtils;
 
-public class BoidsSimulator {
+public class BoidsPlatformThreadsSimulator {
 
     private BoidsModel model;
     private Optional<BoidsView> view;
@@ -14,7 +14,7 @@ public class BoidsSimulator {
     private static final int FRAMERATE = 30;
     private int framerate;
 
-    public BoidsSimulator(BoidsModel model) {
+    public BoidsPlatformThreadsSimulator(BoidsModel model) {
         this.model = model;
         view = Optional.empty();
     }
