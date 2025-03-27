@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class BoidsSimulator {
+public class BoidsTasksSimulator {
 
     private BoidsModel model;
     private Optional<BoidsView> view;
@@ -15,7 +15,7 @@ public class BoidsSimulator {
     private static final int FRAMERATE = 25;
     private int framerate;
     
-    public BoidsSimulator(BoidsModel model) {
+    public BoidsTasksSimulator(BoidsModel model) {
         this.model = model;
         view = Optional.empty();
     }
