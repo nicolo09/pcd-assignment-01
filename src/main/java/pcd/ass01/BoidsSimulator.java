@@ -1,13 +1,8 @@
 package pcd.ass01;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-public class BoidsTasksSimulator {
+public class BoidsSimulator {
 
     private BoidsModel model;
     private Optional<BoidsView> view;
@@ -16,8 +11,9 @@ public class BoidsTasksSimulator {
 
     private static final int FRAMERATE = 25;
     private int framerate;
-    
-    public BoidsTasksSimulator(BoidsModel model) {
+
+    public BoidsSimulator(BoidsModel model) {
+
         this.model = model;
         view = Optional.empty();
     }
@@ -51,42 +47,27 @@ public class BoidsTasksSimulator {
     }
 
     public void runSimulation() {
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+1);
-
-    	while (true) {
+        while (!isStopped()) {
             var t0 = System.currentTimeMillis();
-    		var boids = model.getBoids();
-            BoidsModel modelCopy = new BoidsModel(model);
-    		    		
-    		/* 
-    		 * Improved correctness: first update velocities...
-    		 */
-            List<Future<?>> velocityFutures = new ArrayList<>();
-    		boids.forEach(boid -> velocityFutures.add(executor.submit(() -> boid.updateVelocity(modelCopy))));
-            velocityFutures.forEach(f -> {
-                try {
-                    f.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+            var boids = model.getBoids();
 
-    		/* 
-    		 * ..then update positions
-    		 */
-            List<Future<?>> posFutures = new ArrayList<>();
-    		boids.forEach(boid -> posFutures.add(executor.submit(() -> boid.updatePos(modelCopy))));
-            posFutures.forEach(f -> {
-                try {
-                    f.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-            
-    		if (view.isPresent()) {
-            	view.get().update(framerate);
-            	var t1 = System.currentTimeMillis();
+            /*
+             * Improved correctness: first update velocities...
+             */
+            for (Boid boid : boids) {
+                boid.updateVelocity(model);
+            }
+
+            /*
+             * ..then update positions
+             */
+            for (Boid boid : boids) {
+                boid.updatePos(model);
+            }
+
+            if (view.isPresent()) {
+                view.get().update(framerate);
+                var t1 = System.currentTimeMillis();
                 var dtElapsed = t1 - t0;
                 var framratePeriod = 1000 / FRAMERATE;
 

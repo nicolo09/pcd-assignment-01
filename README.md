@@ -106,9 +106,10 @@ The objective of the assignment is to design and develop a concurrent version of
 - Java **multithreaded programming** (using default/platform threads)
 - **Task-based** approach based o Java **Executor Framework** 
 - Java **Virtual Threads** 
+    - Remark: *in Virtual Threads based solution, Executors based on Virtual Threads cannot be used*.
 
 The GUI must provide:
-- buttons to start/stop the simulation
+- buttons to start, suspend/resume, stop the simulation
 - input box to specify at the beginning the number of boids to be used
 - sliders to define the weights for separation/alignment/cohesion 
 
