@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Boid {
 
-    private static int idCounter = 0;
+    private static int idsCounter = 0;
 
     private final int id;
     private P2d pos;
@@ -14,13 +14,13 @@ public class Boid {
     public Boid(P2d pos, V2d vel) {
     	this.pos = pos;
     	this.vel = vel;
-        id = idCounter++;
+        this.id = idsCounter++;
     }
 
     public Boid(Boid boid) {
-    	this.pos = boid.pos;
-    	this.vel = boid.vel;
-        id = boid.id;
+    	this.pos = new P2d(boid.getPos().x(), boid.getPos().y());
+    	this.vel = new V2d(boid.getVel().x(), boid.getVel().y());
+        this.id = boid.id;
     }
     
     public P2d getPos() {
