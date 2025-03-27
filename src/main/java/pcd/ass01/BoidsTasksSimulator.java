@@ -8,45 +8,15 @@ import java.util.concurrent.Future;
 
 public class BoidsTasksSimulator extends BoidsSimulator {
 
-    private volatile boolean isPaused = false;
-    private volatile boolean isStopped = false;
-
     public BoidsTasksSimulator(BoidsModel model) {
         super(model);
-    }
-
-    @Override
-    public synchronized void pauseSimulation() {
-        isPaused = true;
-    }
-
-    @Override
-    public synchronized void resumeSimulation() {
-        if (isPaused) {
-            isPaused = false;
-            notify();
-        }
-    }
-
-    @Override
-    public synchronized void stopSimulation() {
-        if (!isStopped) {
-            isStopped = true;
-            if (isPaused) {
-                notify();
-            }
-        }
-    }
-
-    public synchronized boolean isStopped() {
-        return isStopped;
     }
 
     public void runSimulation() {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
         int framerate = 0;
 
-        while (!isStopped()) {
+        while (!this.isStopped()) {
             var t0 = System.currentTimeMillis();
             var boids = this.getModel().getBoids();
             BoidsModel modelCopy = new BoidsModel(this.getModel());
@@ -95,14 +65,13 @@ public class BoidsTasksSimulator extends BoidsSimulator {
             }
 
             // Pause simulation if requested
-            synchronized (this) {
-                while (isPaused) {
-                    try {
-                        wait();
-                    } catch (Exception ex) {
-                    }
+            while (this.isPaused()) {
+                try {
+                    wait();
+                } catch (Exception ex) {
                 }
             }
+
         }
 
         executor.shutdown();

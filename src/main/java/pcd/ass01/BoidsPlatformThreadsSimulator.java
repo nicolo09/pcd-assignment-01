@@ -7,36 +7,9 @@ import org.apache.commons.collections4.ListUtils;
 
 public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
 
-    private volatile boolean isPaused = false;
-    private volatile boolean isStopped = false;
-
     public BoidsPlatformThreadsSimulator(BoidsModel model) {
         super(model);
 
-    }
-
-    public synchronized void pauseSimulation() {
-        isPaused = true;
-    }
-
-    public synchronized void resumeSimulation() {
-        if (isPaused) {
-            isPaused = false;
-            notify();
-        }
-    }
-
-    public synchronized void stopSimulation() {
-        if (!isStopped) {
-            isStopped = true;
-            if (isPaused) {
-                notify();
-            }
-        }
-    }
-
-    public synchronized boolean isStopped() {
-        return isStopped;
     }
 
     public void runSimulation() {
@@ -91,6 +64,14 @@ public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
                 barrier.await();
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+
+            // Pause simulation if requested
+            while (this.isPaused()) {
+                try {
+                    wait();
+                } catch (Exception ex) {
+                }
             }
         }
 

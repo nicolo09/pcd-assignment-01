@@ -70,7 +70,7 @@ public class StartView {
         });
         startVTButton.addActionListener(e -> {
             createModel(boidsNumberField).ifPresent(model -> {
-                getThread(new BoidsSerialSimulator(model), model, startFrame).start(); //TODO: Fix this
+                getThread(new BoidsVirtualThreadsSimulator(model), model, startFrame).start();
             });
         });
 

@@ -24,23 +24,23 @@ public class BoidUpdateVirtualThreadsRunnable implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 modelBarrier.await();
             } catch (Exception ex) {
-                ex.printStackTrace();
+                return;
             }
             boid.updateVelocity(localModel);
             try {
                 updateBarrier.await();
             } catch (Exception ex) {
-                ex.printStackTrace();
+                return;
             }
             boid.updatePos(localModel);
             try {
                 updateBarrier.await();
             } catch (Exception ex) {
-                ex.printStackTrace();
+                return;
             }
             // the thread will wait on the model barrier until the model is updated
         }

@@ -6,6 +6,8 @@ public abstract class BoidsSimulator {
 
     private BoidsModel model;
     private Optional<BoidsView> view;
+    private volatile boolean isPaused = false;
+    private volatile boolean isStopped = false;
 
     protected static final int FRAMERATE = 25;
 
@@ -26,11 +28,33 @@ public abstract class BoidsSimulator {
         return view;
     }
 
-    public abstract void pauseSimulation();
+    public synchronized void pauseSimulation() {
+        isPaused = true;
+    }
 
-    public abstract void resumeSimulation();
+    public synchronized void resumeSimulation() {
+        if (isPaused) {
+            isPaused = false;
+            notify();
+        }
+    }
 
-    public abstract void stopSimulation();
+    public synchronized void stopSimulation() {
+        if (!isStopped) {
+            isStopped = true;
+            if (isPaused) {
+                notify();
+            }
+        }
+    }
+
+    protected synchronized boolean isStopped() {
+        return isStopped;
+    }
+
+    protected synchronized boolean isPaused() {
+        return isPaused;
+    }
 
     public abstract void runSimulation();
 
