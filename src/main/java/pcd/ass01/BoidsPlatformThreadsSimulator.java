@@ -1,42 +1,60 @@
 package pcd.ass01;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CyclicBarrier;
 
 import org.apache.commons.collections4.ListUtils;
 
-public class BoidsPlatformThreadsSimulator {
+public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
 
-    private BoidsModel model;
-    private Optional<BoidsView> view;
-
-    private static final int FRAMERATE = 30;
-    private int framerate;
+    private volatile boolean isPaused = false;
+    private volatile boolean isStopped = false;
 
     public BoidsPlatformThreadsSimulator(BoidsModel model) {
-        this.model = model;
-        view = Optional.empty();
+        super(model);
+
     }
 
-    public void attachView(BoidsView view) {
-        this.view = Optional.of(view);
+    public synchronized void pauseSimulation() {
+        isPaused = true;
+    }
+
+    public synchronized void resumeSimulation() {
+        if (isPaused) {
+            isPaused = false;
+            notify();
+        }
+    }
+
+    public synchronized void stopSimulation() {
+        if (!isStopped) {
+            isStopped = true;
+            if (isPaused) {
+                notify();
+            }
+        }
+    }
+
+    public synchronized boolean isStopped() {
+        return isStopped;
     }
 
     public void runSimulation() {
-        var boids = model.getBoids();
+        int framerate = 0;
+        var boids = this.getModel().getBoids();
 
         List<List<Boid>> threadBoids = ListUtils.partition(boids,
                 boids.size() / Runtime.getRuntime().availableProcessors());
         CyclicBarrier barrier = new CyclicBarrier(threadBoids.size() + 1);
         List<BoidPlatformThreadsUpdateRunnable> runnables = threadBoids.stream()
                 .map(boidsList -> new BoidPlatformThreadsUpdateRunnable(boidsList, barrier)).toList();
-
-        runnables.forEach(runnable -> new Thread(runnable).start());
+        List<Thread> threads = runnables.stream()
+                .map(runnable -> new Thread(runnable)).toList();
+        threads.forEach(Thread::start);
 
         var t0 = System.currentTimeMillis();
-        while (true) {
-            runnables.forEach(runnable -> runnable.setModel(new BoidsModel(model)));
+        while (!this.isStopped()) {
+            runnables.forEach(runnable -> runnable.setModel(new BoidsModel(this.getModel())));
 
             try {
                 barrier.await();
@@ -44,8 +62,8 @@ public class BoidsPlatformThreadsSimulator {
                 e.printStackTrace();
             }
 
-            if (view.isPresent()) {
-                view.get().update(framerate);
+            if (this.getView().isPresent()) {
+                this.getView().get().update(framerate);
                 var t1 = System.currentTimeMillis();
                 var dtElapsed = t1 - t0;
                 var framratePeriod = 1000 / FRAMERATE;
@@ -75,5 +93,14 @@ public class BoidsPlatformThreadsSimulator {
                 e.printStackTrace();
             }
         }
+
+        threads.forEach(Thread::interrupt);
+        threads.forEach(t -> {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

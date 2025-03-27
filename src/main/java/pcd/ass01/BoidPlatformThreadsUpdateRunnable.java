@@ -20,24 +20,24 @@ public class BoidPlatformThreadsUpdateRunnable implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 // the model will be updated by the main thread here
                 barrier.await();
             } catch (Exception e) {
-                e.printStackTrace();
+                return;
             }
             boids.forEach(boid -> boid.updateVelocity(model));
             try {
                 barrier.await();
             } catch (Exception e) {
-                e.printStackTrace();
+                return;
             }
             boids.forEach(boid -> boid.updatePos(model));
             try {
                 barrier.await();
             } catch (Exception e) {
-                e.printStackTrace();
+                return;
             }
         }
     }

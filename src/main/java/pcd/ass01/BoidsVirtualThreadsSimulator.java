@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CyclicBarrier;
 
-public class BoidsVirtualThreadsSimulator {
+public class BoidsVirtualThreadsSimulator  {
 
     private BoidsModel model;
     private Optional<BoidsView> view;

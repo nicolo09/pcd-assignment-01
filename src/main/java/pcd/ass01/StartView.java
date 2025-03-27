@@ -10,6 +10,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import java.awt.*;
+import java.util.Optional;
 
 public class StartView {
 
@@ -43,46 +44,77 @@ public class StartView {
         JTextField boidsNumberField = new JTextField();
         cp.add(boidsNumberField);
 
-        JButton startButton = new JButton("Start");
-        cp.add(startButton);
+        JButton startSerialButton = new JButton("Serial");
+        JButton startPTButton = new JButton("Platform Threads");
+        JButton startTasksButton = new JButton("Task based");
+        JButton startVTButton = new JButton("Virtual Threads");
+        cp.add(startSerialButton);
+        cp.add(startPTButton);
+        cp.add(startTasksButton);
+        cp.add(startVTButton);
 
-        startButton.addActionListener(e -> {
-            new Thread(() -> {
-                int nBoids = 1500;
-                try {
-                    nBoids = Integer.parseInt(boidsNumberField.getText());
-                    if (nBoids <= 0) {
-                        throw new NumberFormatException();
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(startFrame,
-                            boidsNumberField.getText() + " is not a valid number of boids",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                var model = new BoidsModel(
-                        nBoids,
-                        SEPARATION_WEIGHT, ALIGNMENT_WEIGHT, COHESION_WEIGHT,
-                        ENVIRONMENT_WIDTH, ENVIRONMENT_HEIGHT,
-                        MAX_SPEED,
-                        PERCEPTION_RADIUS,
-                        AVOID_RADIUS);
-                var sim = new BoidsSimulator(model);
-                BoidsView view = new BoidsView(model, SCREEN_WIDTH, SCREEN_HEIGHT, sim::pauseSimulation,
-                        sim::resumeSimulation, () -> {
-                            sim.stopSimulation();
-                            SwingUtilities.invokeLater(() -> {
-                                startFrame.setVisible(true);
-                            });
-                        });
-                sim.attachView(view);
-                SwingUtilities.invokeLater(() -> {
-                    startFrame.setVisible(false);
-                });
-                sim.runSimulation();
-            }, "simulation-thread").start();
+        startSerialButton.addActionListener(e -> {
+            createModel(boidsNumberField).ifPresent(model -> {
+                getThread(new BoidsSerialSimulator(model), model, startFrame).start();
+            });
         });
+        startPTButton.addActionListener(e -> {
+            createModel(boidsNumberField).ifPresent(model -> {
+                getThread(new BoidsPlatformThreadsSimulator(model), model, startFrame).start();
+            });
+        });
+        startTasksButton.addActionListener(e -> {
+            createModel(boidsNumberField).ifPresent(model -> {
+                getThread(new BoidsTasksSimulator(model), model, startFrame).start();
+            });
+        });
+        startVTButton.addActionListener(e -> {
+            createModel(boidsNumberField).ifPresent(model -> {
+                getThread(new BoidsSerialSimulator(model), model, startFrame).start(); //TODO: Fix this
+            });
+        });
+
         startFrame.setContentPane(cp);
         startFrame.setVisible(true);
+    }
+
+    private Optional<BoidsModel> createModel(JTextField boidsNumberField) {
+        int nBoids = 0;
+        try {
+            nBoids = Integer.parseInt(boidsNumberField.getText());
+            if (nBoids <= 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException ex) {
+            // TODO: Move message dialog to optional ifEmpty
+            JOptionPane.showMessageDialog(startFrame,
+                    boidsNumberField.getText() + " is not a valid number of boids",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return Optional.empty();
+        }
+        return Optional.of(new BoidsModel(
+                nBoids,
+                SEPARATION_WEIGHT, ALIGNMENT_WEIGHT, COHESION_WEIGHT,
+                ENVIRONMENT_WIDTH, ENVIRONMENT_HEIGHT,
+                MAX_SPEED,
+                PERCEPTION_RADIUS,
+                AVOID_RADIUS));
+    }
+
+    public static Thread getThread(BoidsSimulator sim, BoidsModel model, JFrame startFrame) {
+        return new Thread(() -> {
+            BoidsView view = new BoidsView(model, SCREEN_WIDTH, SCREEN_HEIGHT, sim::pauseSimulation,
+                    sim::resumeSimulation, () -> {
+                        sim.stopSimulation();
+                        SwingUtilities.invokeLater(() -> {
+                            startFrame.setVisible(true);
+                        });
+                    });
+            sim.attachView(view);
+            SwingUtilities.invokeLater(() -> {
+                startFrame.setVisible(false);
+            });
+            sim.runSimulation();
+        }, "simulation-thread");
     }
 }

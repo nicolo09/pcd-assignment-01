@@ -1,26 +1,18 @@
 package pcd.ass01;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-public class BoidsTasksSimulator extends BoidsSimulator {
+public class BoidsSerialSimulator extends BoidsSimulator {
 
     private volatile boolean isPaused = false;
     private volatile boolean isStopped = false;
 
-    public BoidsTasksSimulator(BoidsModel model) {
+    public BoidsSerialSimulator(BoidsModel model) {
         super(model);
     }
 
-    @Override
     public synchronized void pauseSimulation() {
         isPaused = true;
     }
 
-    @Override
     public synchronized void resumeSimulation() {
         if (isPaused) {
             isPaused = false;
@@ -28,7 +20,6 @@ public class BoidsTasksSimulator extends BoidsSimulator {
         }
     }
 
-    @Override
     public synchronized void stopSimulation() {
         if (!isStopped) {
             isStopped = true;
@@ -43,39 +34,24 @@ public class BoidsTasksSimulator extends BoidsSimulator {
     }
 
     public void runSimulation() {
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
         int framerate = 0;
-
         while (!isStopped()) {
             var t0 = System.currentTimeMillis();
             var boids = this.getModel().getBoids();
-            BoidsModel modelCopy = new BoidsModel(this.getModel());
 
             /*
              * Improved correctness: first update velocities...
              */
-            List<Future<?>> velocityFutures = new ArrayList<>();
-            boids.forEach(boid -> velocityFutures.add(executor.submit(() -> boid.updateVelocity(modelCopy))));
-            velocityFutures.forEach(f -> {
-                try {
-                    f.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+            for (Boid boid : boids) {
+                boid.updateVelocity(this.getModel());
+            }
 
             /*
              * ..then update positions
              */
-            List<Future<?>> posFutures = new ArrayList<>();
-            boids.forEach(boid -> posFutures.add(executor.submit(() -> boid.updatePos(modelCopy))));
-            posFutures.forEach(f -> {
-                try {
-                    f.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+            for (Boid boid : boids) {
+                boid.updatePos(this.getModel());
+            }
 
             if (this.getView().isPresent()) {
                 this.getView().get().update(framerate);
@@ -104,7 +80,5 @@ public class BoidsTasksSimulator extends BoidsSimulator {
                 }
             }
         }
-
-        executor.shutdown();
     }
 }
