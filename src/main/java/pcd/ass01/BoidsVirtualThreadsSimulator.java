@@ -27,17 +27,17 @@ public class BoidsVirtualThreadsSimulator {
         final CyclicBarrier barrier = new CyclicBarrier(boids.size() + 1);
         final CyclicBarrier modelBarrier = new CyclicBarrier(boids.size() + 1);
         BoidsModel localModel = null;
-        List<BoidUpdateRunnable> runnables = new ArrayList<>();
+        List<BoidUpdateVirtualThreadsRunnable> runnables = new ArrayList<>();
 
         for (Boid boid : boids) {
-            runnables.add(new BoidUpdateRunnable(boid, barrier, modelBarrier));
+            runnables.add(new BoidUpdateVirtualThreadsRunnable(boid, barrier, modelBarrier));
             Thread.ofVirtual().start(runnables.get(runnables.size() - 1));
         }
 
         var t0 = System.currentTimeMillis();
         while (true) {
             localModel = new BoidsModel(model);
-            for (BoidUpdateRunnable runnable : runnables) {
+            for (BoidUpdateVirtualThreadsRunnable runnable : runnables) {
                 runnable.setBoidModel(localModel);
             }
 

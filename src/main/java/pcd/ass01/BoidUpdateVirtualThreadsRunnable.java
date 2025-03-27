@@ -2,14 +2,14 @@ package pcd.ass01;
 
 import java.util.concurrent.CyclicBarrier;
 
-public class BoidUpdateRunnable implements Runnable {
+public class BoidUpdateVirtualThreadsRunnable implements Runnable {
 
     private final Boid boid;
     private BoidsModel localModel;
     private final CyclicBarrier updateBarrier; // barrier for updating velocity and position
     private final CyclicBarrier modelBarrier; // barrier for updating the model
 
-    public BoidUpdateRunnable(Boid boid, CyclicBarrier barrier, CyclicBarrier modelBarrier) {
+    public BoidUpdateVirtualThreadsRunnable(Boid boid, CyclicBarrier barrier, CyclicBarrier modelBarrier) {
         this.boid = boid;
         this.updateBarrier = barrier;
         this.modelBarrier = modelBarrier;
