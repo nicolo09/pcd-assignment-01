@@ -14,59 +14,75 @@ public class BoidsView implements ChangeListener {
 	private JSlider cohesionSlider, separationSlider, alignmentSlider;
 	private BoidsModel model;
 	private int width, height;
-	
-	public BoidsView(BoidsModel model, int width, int height) {
+
+	public BoidsView(BoidsModel model, int width, int height, Runnable onPause, Runnable onResume,
+			Runnable onBeforeStop) {
 		this.model = model;
 		this.width = width;
 		this.height = height;
-		
+
 		frame = new JFrame("Boids Simulation");
-        frame.setSize(width, height);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(width, height);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JPanel cp = new JPanel();
 		LayoutManager layout = new BorderLayout();
 		cp.setLayout(layout);
 
-        boidsPanel = new BoidsPanel(this, model);
+		boidsPanel = new BoidsPanel(this, model);
 		cp.add(BorderLayout.CENTER, boidsPanel);
 
-        JPanel slidersPanel = new JPanel();
-        
-        cohesionSlider = makeSlider();
-        separationSlider = makeSlider();
-        alignmentSlider = makeSlider();
-        
-        slidersPanel.add(new JLabel("Separation"));
-        slidersPanel.add(separationSlider);
-        slidersPanel.add(new JLabel("Alignment"));
-        slidersPanel.add(alignmentSlider);
-        slidersPanel.add(new JLabel("Cohesion"));
-        slidersPanel.add(cohesionSlider);
-		        
+		JPanel slidersPanel = new JPanel();
+
+		cohesionSlider = makeSlider();
+		separationSlider = makeSlider();
+		alignmentSlider = makeSlider();
+
+		slidersPanel.add(new JLabel("Separation"));
+		slidersPanel.add(separationSlider);
+		slidersPanel.add(new JLabel("Alignment"));
+		slidersPanel.add(alignmentSlider);
+		slidersPanel.add(new JLabel("Cohesion"));
+		slidersPanel.add(cohesionSlider);
+
 		cp.add(BorderLayout.SOUTH, slidersPanel);
 
-		frame.setContentPane(cp);	
-		
-        frame.setVisible(true);
+		JPanel buttonsPanel = new JPanel();
+		JButton pauseButton = new JButton("Pause");
+		pauseButton.addActionListener(e -> onPause.run());
+		buttonsPanel.add(pauseButton);
+		JButton resumeButton = new JButton("Resume");
+		resumeButton.addActionListener(e -> onResume.run());
+		buttonsPanel.add(resumeButton);
+		JButton stopButton = new JButton("Stop");
+		stopButton.addActionListener(e -> {
+			onBeforeStop.run();
+			SwingUtilities.invokeLater(frame::dispose);
+		});
+		buttonsPanel.add(stopButton);
+		cp.add(BorderLayout.NORTH, buttonsPanel);
+
+		frame.setContentPane(cp);
+
+		frame.setVisible(true);
 	}
 
 	private JSlider makeSlider() {
-		var slider = new JSlider(JSlider.HORIZONTAL, 0, 20, 10);        
+		var slider = new JSlider(JSlider.HORIZONTAL, 0, 20, 10);
 		slider.setMajorTickSpacing(10);
 		slider.setMinorTickSpacing(1);
 		slider.setPaintTicks(true);
 		slider.setPaintLabels(true);
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
-		labelTable.put( 0, new JLabel("0") );
-		labelTable.put( 10, new JLabel("1") );
-		labelTable.put( 20, new JLabel("2") );
-		slider.setLabelTable( labelTable );
+		labelTable.put(0, new JLabel("0"));
+		labelTable.put(10, new JLabel("1"));
+		labelTable.put(20, new JLabel("2"));
+		slider.setLabelTable(labelTable);
 		slider.setPaintLabels(true);
-        slider.addChangeListener(this);
+		slider.addChangeListener(this);
 		return slider;
 	}
-	
+
 	public void update(int frameRate) {
 		boidsPanel.setFrameRate(frameRate);
 		boidsPanel.repaint();
@@ -76,22 +92,26 @@ public class BoidsView implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == separationSlider) {
 			var val = separationSlider.getValue();
-			model.setSeparationWeight(0.1*val);
+			model.setSeparationWeight(0.1 * val);
 		} else if (e.getSource() == cohesionSlider) {
 			var val = cohesionSlider.getValue();
-			model.setCohesionWeight(0.1*val);
+			model.setCohesionWeight(0.1 * val);
 		} else {
 			var val = alignmentSlider.getValue();
-			model.setAlignmentWeight(0.1*val);
+			model.setAlignmentWeight(0.1 * val);
 		}
 	}
-	
+
 	public int getWidth() {
 		return width;
 	}
 
 	public int getHeight() {
 		return height;
+	}
+
+	public void close() {
+		frame.dispose();
 	}
 
 }
