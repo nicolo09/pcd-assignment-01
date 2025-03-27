@@ -3,13 +3,13 @@ package pcd.ass01;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 
-public class BoidUpdateRunnable implements Runnable {
+public class BoidPlatformThreadsUpdateRunnable implements Runnable {
 
     private final List<Boid> boids;
     private BoidsModel model;
     private final CyclicBarrier barrier;
 
-    public BoidUpdateRunnable(List<Boid> boids, CyclicBarrier barrier) {
+    public BoidPlatformThreadsUpdateRunnable(List<Boid> boids, CyclicBarrier barrier) {
         this.boids = boids;
         this.barrier = barrier;
     }

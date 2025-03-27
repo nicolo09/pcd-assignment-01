@@ -29,8 +29,8 @@ public class BoidsPlatformThreadsSimulator {
         List<List<Boid>> threadBoids = ListUtils.partition(boids,
                 boids.size() / Runtime.getRuntime().availableProcessors());
         CyclicBarrier barrier = new CyclicBarrier(threadBoids.size() + 1);
-        List<BoidUpdateRunnable> runnables = threadBoids.stream()
-                .map(boidsList -> new BoidUpdateRunnable(boidsList, barrier)).toList();
+        List<BoidPlatformThreadsUpdateRunnable> runnables = threadBoids.stream()
+                .map(boidsList -> new BoidPlatformThreadsUpdateRunnable(boidsList, barrier)).toList();
 
         runnables.forEach(runnable -> new Thread(runnable).start());
 
