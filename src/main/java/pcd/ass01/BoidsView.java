@@ -5,6 +5,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.Hashtable;
 
 public class BoidsView implements ChangeListener {
@@ -23,7 +25,45 @@ public class BoidsView implements ChangeListener {
 
 		frame = new JFrame("Boids Simulation");
 		frame.setSize(width, height);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowListener() {
+
+			@Override
+			public void windowOpened(WindowEvent e) {
+				return;
+			}
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				onBeforeStop.run();
+				SwingUtilities.invokeLater(frame::dispose);
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				return;
+			}
+
+			@Override
+			public void windowIconified(WindowEvent e) {
+				return;
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				return;
+			}
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+				return;
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				return;
+			}
+		});
 
 		JPanel cp = new JPanel();
 		LayoutManager layout = new BorderLayout();
