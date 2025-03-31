@@ -6,17 +6,18 @@ public abstract class BoidsSimulator {
 
     private BoidsModel model;
     private Optional<BoidsView> view;
-    private volatile boolean isPaused = false;
-    private volatile boolean isStopped = false;
+    private SimulatorStateMonitor stateMonitor;
+    
 
     protected static final int FRAMERATE = 25;
 
     public BoidsSimulator(BoidsModel model) {
         this.model = model;
         view = Optional.empty();
+        stateMonitor = new SimulatorStateMonitor();
     }
 
-    public synchronized void attachView(BoidsView view) {
+    public void attachView(BoidsView view) {
         this.view = Optional.of(view);
     }
 
@@ -28,32 +29,24 @@ public abstract class BoidsSimulator {
         return view;
     }
 
-    public synchronized void pauseSimulation() {
-        isPaused = true;
+    public void pauseSimulation() {
+        stateMonitor.pauseSimulation();
     }
 
-    public synchronized void resumeSimulation() {
-        if (isPaused) {
-            isPaused = false;
-            notify();
-        }
+    public void resumeSimulation() {
+        stateMonitor.resumeSimulation();
     }
 
-    public synchronized void stopSimulation() {
-        if (!isStopped) {
-            isStopped = true;
-            if (isPaused) {
-                notify();
-            }
-        }
+    public void stopSimulation() {
+        stateMonitor.stopSimulation();
     }
 
-    protected synchronized boolean isStopped() {
-        return isStopped;
+    protected boolean isStopped() {
+        return stateMonitor.isStopped();
     }
 
-    protected synchronized boolean isPaused() {
-        return isPaused;
+    protected boolean isPaused() {
+        return stateMonitor.isPaused();
     }
 
     public abstract void runSimulation();
