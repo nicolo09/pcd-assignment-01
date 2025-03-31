@@ -2,7 +2,6 @@ package pcd.ass01;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CyclicBarrier;
 
 public class BoidsVirtualThreadsSimulator extends BoidsSimulator {
 
@@ -13,8 +12,8 @@ public class BoidsVirtualThreadsSimulator extends BoidsSimulator {
     public void runSimulation() {
         int framerate = 0;
         var boids = this.getModel().getBoids();
-        final CyclicBarrier barrier = new CyclicBarrier(boids.size() + 1);
-        final CyclicBarrier modelBarrier = new CyclicBarrier(boids.size() + 1);
+        final MyBarrier barrier = new MyBarrier(boids.size() + 1);
+        final MyBarrier modelBarrier = new MyBarrier(boids.size() + 1);
         BoidsModel localModel = null;
         List<BoidUpdateVirtualThreadsRunnable> runnables = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();

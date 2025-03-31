@@ -1,7 +1,6 @@
 package pcd.ass01;
 
 import java.util.List;
-import java.util.concurrent.CyclicBarrier;
 
 import org.apache.commons.collections4.ListUtils;
 
@@ -18,7 +17,7 @@ public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
 
         List<List<Boid>> threadBoids = ListUtils.partition(boids,
                 boids.size() / Runtime.getRuntime().availableProcessors());
-        CyclicBarrier barrier = new CyclicBarrier(threadBoids.size() + 1);
+        MyBarrier barrier = new MyBarrier(threadBoids.size() + 1);
         List<BoidPlatformThreadsUpdateRunnable> runnables = threadBoids.stream()
                 .map(boidsList -> new BoidPlatformThreadsUpdateRunnable(boidsList, barrier)).toList();
         List<Thread> threads = runnables.stream()

@@ -7,7 +7,6 @@ public abstract class BoidsSimulator {
     private BoidsModel model;
     private Optional<BoidsView> view;
     private SimulatorStateMonitor stateMonitor;
-    
 
     protected static final int FRAMERATE = 25;
 
