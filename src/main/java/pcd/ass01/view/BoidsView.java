@@ -1,8 +1,10 @@
-package pcd.ass01;
+package pcd.ass01.view;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import pcd.ass01.model.BoidsModel;
 
 import java.awt.*;
 import java.awt.event.WindowEvent;

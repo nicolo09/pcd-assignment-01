@@ -1,4 +1,4 @@
-package pcd.ass01;
+package pcd.ass01.view;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -9,6 +9,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+
+import pcd.ass01.model.BoidsModel;
+import pcd.ass01.simulators.BoidsPlatformThreadsSimulator;
+import pcd.ass01.simulators.BoidsSerialSimulator;
+import pcd.ass01.simulators.BoidsSimulator;
+import pcd.ass01.simulators.BoidsTasksSimulator;
+import pcd.ass01.simulators.BoidsVirtualThreadsSimulator;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

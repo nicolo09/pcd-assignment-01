@@ -1,5 +1,8 @@
-package pcd.ass01;
+package pcd.ass01.simulators;
 
+import pcd.ass01.model.Boid;
+import pcd.ass01.model.BoidsModel;
+import pcd.ass01.simulators.utils.MyBarrier;
 
 public class BoidUpdateVirtualThreadsRunnable implements Runnable {
 

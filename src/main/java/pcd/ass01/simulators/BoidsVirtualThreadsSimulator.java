@@ -1,7 +1,11 @@
-package pcd.ass01;
+package pcd.ass01.simulators;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import pcd.ass01.model.Boid;
+import pcd.ass01.model.BoidsModel;
+import pcd.ass01.simulators.utils.MyBarrier;
 
 public class BoidsVirtualThreadsSimulator extends BoidsSimulator {
 

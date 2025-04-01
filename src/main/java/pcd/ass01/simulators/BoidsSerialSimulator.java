@@ -1,4 +1,7 @@
-package pcd.ass01;
+package pcd.ass01.simulators;
+
+import pcd.ass01.model.Boid;
+import pcd.ass01.model.BoidsModel;
 
 public class BoidsSerialSimulator extends BoidsSimulator {
 

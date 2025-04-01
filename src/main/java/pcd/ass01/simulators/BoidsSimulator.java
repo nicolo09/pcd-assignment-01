@@ -1,6 +1,10 @@
-package pcd.ass01;
+package pcd.ass01.simulators;
 
 import java.util.Optional;
+
+import pcd.ass01.model.BoidsModel;
+import pcd.ass01.simulators.utils.SimulatorStateMonitor;
+import pcd.ass01.view.BoidsView;
 
 public abstract class BoidsSimulator {
 

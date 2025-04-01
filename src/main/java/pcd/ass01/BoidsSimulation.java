@@ -1,5 +1,7 @@
 package pcd.ass01;
 
+import pcd.ass01.view.StartView;
+
 public class BoidsSimulation {
 
 	final static int START_WIDTH = 300;
