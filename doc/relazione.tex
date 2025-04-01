@@ -1,0 +1,77 @@
+\documentclass[11pt,notitlepage]{article}
+\usepackage[a4paper, margin={2cm, 2.2cm}]{geometry}
+\usepackage[a-2b]{pdfx}[2018/12/22]
+\usepackage{alltt, fancyvrb, url}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{numprint}
+\usepackage{slashbox}
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\usepackage{lipsum}
+\usepackage{tikz}
+\pgfplotsset{compat=1.9,
+            tick label style={font=\tiny},
+            label style={font=\tiny}}
+
+% Questo commentalo se vuoi scrivere in inglese.
+\usepackage[italian]{babel}
+
+\usepackage[italian]{cleveref}
+
+\title{Programmazione concorrente e distribuita \\ Assignment 01}
+
+\author{
+    \href{mailto:nicolo.guerra@studio.unibo.it}{Nicolò Guerra, matricola }
+    \href{mailto:filippo.casadei9@studio.unibo.it}{Filippo Casadei, matricola 0001179572}
+    \href{mailto:emma.leonardi2@studio.unibo.it}{Emma Leonardi, matricola }
+    }
+\date{\today}
+
+\begin{document}
+\maketitle
+\renewcommand{\thesection}{\arabic{section}}
+\section{Analisi del problema}
+Il problema riguarda la parallelizzazione dell'algoritmo Boids. Le soluzioni proposte sono tre diverse implementazioni, ognuna delle quali sfrutta un diverso approccio di 
+programmazione concorrente. 
+Le tre soluzioni sono: 
+\begin{itemize}
+    \item \textbf{Platform Threads}: utilizza i platform threads del sistema operativo per parallelizzare l'algoritmo.
+    \item \textbf{Task-based}: utilizza l'approccio basato su task e sulla API Java Executor Framework.
+    \item \textbf{Virtual Threads}: utilizza i virtual threads di Java per parallelizzare l'algoritmo.
+\end{itemize}
+
+\section{Introduzione}
+È stata implementata una classe base astratta \textsf{BoidsSimulator} che contiene il model, la view, i metodi per fermare e avviare la simulazione e il metodo astratto 
+\textsf{runSimulation()} che conterrà il main loop della simulazione e che deve essere implementato dalle tre classi derivate.
+
+Contiene inoltre un oggetto di classe \textsf{SimulatorStateMonitor}, che è stata implementata con tutti metodi \textsf{synchronized} per contenere lo stato della simulazione
+e fornire i metodi per fermarla e avviarla.
+
+\section{Platform Threads}
+Per la soluzione basata su threads si è deciso di utilizzare un numero di thread pari al numero di processori della macchina aumentato di 1. La lista dei Boid è stata
+quindi partizionata in un numero di sotto-liste pari al numero di thread, in modo che ogni thread possa lavorare su una sotto-lista di Boid.
+Dato che ogni thread ha bisogno di scrivere la posizione e la velocità dei Boids su cui lavora e di leggere quelle dei Boids vicini, si è deciso per evitare meccanismi di 
+sincronizzazione che avrebbero portato a rallentamenti importanti di lavorare su copie del model e di sincronizzare gli aggiornamenti al model principale solo alla fine di ogni
+iterazione.
+
+L'iterazione inizia perciò con i thread bloccati da una barriera in attesa che il main assegni a ciascuno una copia del model. Il main sblocca poi la barrier e ogni
+thread esegue l'aggiornamento delle velocità concorrentemente al disegno della view da parte del main thread (le velocità non vengono lette durante l'aggiornamento della view).
+A questo punto i thread si bloccano nuovamente in barrier in modo che possano proseguire solo quando tutti hanno aggiornato le velocità e il main la view. Una volta superata la barriera
+aggiornano le posizioni dei Boids e si sincronizzano nuovamente su una barriera.
+
+\section{Task-based}
+
+\section{Virtual Threads}
+
+\section{Dettagli implementativi}
+\subsection{MyBarrier}
+La classe \textsf{MyBarrier} implementa una semplice barriera per la sincronizzazione fra thread. Contiene una \textsf{Condition} su cui i threads che chiamano
+\textsf{await} si mettono in attesa dopo aver incrementato un contatore, quando il contatore raggiunge il numero di threads che devono passare la barriera, il 
+thread che ha incrementato il contatore per ultimo lo resetta e sveglia tutti chiamando \textsf{signalAll} sull'oggetto \textsf{Condition}.
+La classe è resa thread-safe mediante un \textsf{ReentrantLock}.
+
+\end{document}
