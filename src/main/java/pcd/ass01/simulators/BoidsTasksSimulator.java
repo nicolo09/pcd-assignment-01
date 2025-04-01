@@ -18,7 +18,7 @@ public class BoidsTasksSimulator extends BoidsSimulator {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
         int framerate = 0;
 
-        while (!this.isStopped()) {
+        while (!this.getStateMonitor().isStopped()) {
             var t0 = System.currentTimeMillis();
             var boids = this.getModel().getBoids();
             BoidsModel modelCopy = new BoidsModel(this.getModel());
@@ -67,13 +67,14 @@ public class BoidsTasksSimulator extends BoidsSimulator {
             }
 
             // Pause simulation if requested
-            while (this.isPaused()) {
-                try {
-                    wait();
-                } catch (Exception ex) {
+            while (this.getStateMonitor().isPaused()) {
+                synchronized (this.getStateMonitor()) {
+                    try {
+                        this.getStateMonitor().wait();
+                    } catch (Exception ex) {
+                    }
                 }
             }
-
         }
 
         executor.shutdown();

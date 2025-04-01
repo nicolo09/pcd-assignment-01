@@ -6,11 +6,16 @@ import pcd.ass01.model.BoidsModel;
 import pcd.ass01.simulators.utils.SimulatorStateMonitor;
 import pcd.ass01.view.BoidsView;
 
+/**
+ * Abstract class for the Boids simulator. It contains the model, the view,
+ * and the state monitor. It provides methods to attach a view, pause, resume,
+ * and stop the simulation.
+ */
 public abstract class BoidsSimulator {
 
-    private BoidsModel model;
+    private final SimulatorStateMonitor stateMonitor;
+    private final BoidsModel model;
     private Optional<BoidsView> view;
-    private SimulatorStateMonitor stateMonitor;
 
     protected static final int FRAMERATE = 25;
 
@@ -20,38 +25,68 @@ public abstract class BoidsSimulator {
         stateMonitor = new SimulatorStateMonitor();
     }
 
+    /**
+     * Attaches a view to the simulator.
+     *
+     * @param view the view to attach
+     */
     public void attachView(BoidsView view) {
         this.view = Optional.of(view);
     }
 
+    /**
+     * Returns the model of the simulator.
+     * 
+     * @return the model of the simulator
+     */
     protected BoidsModel getModel() {
         return model;
     }
 
-    protected Optional<BoidsView> getView() {
-        return view;
-    }
-
-    public void pauseSimulation() {
-        stateMonitor.pauseSimulation();
-    }
-
-    public void resumeSimulation() {
-        stateMonitor.resumeSimulation();
-    }
-
+    /**
+     * Stops the simulation.
+     */
     public void stopSimulation() {
         stateMonitor.stopSimulation();
     }
 
-    protected boolean isStopped() {
-        return stateMonitor.isStopped();
+    /**
+     * Pauses the simulation.
+     */
+    public void pauseSimulation() {
+        stateMonitor.pauseSimulation();
     }
 
-    protected boolean isPaused() {
-        return stateMonitor.isPaused();
+    /**
+     * Resumes the simulation.
+     */
+    public void resumeSimulation() {
+        stateMonitor.resumeSimulation();
     }
 
+    /**
+     * Returns the view of the simulator.
+     * 
+     * @return the view of the simulator
+     */
+    protected Optional<BoidsView> getView() {
+        return view;
+    }
+
+    /**
+     * @return the simulator state monitor
+     */
+    protected SimulatorStateMonitor getStateMonitor() {
+        return stateMonitor;
+    }
+
+    /**
+     * Runs the simulation. This method should be implemented by the subclasses.
+     * It should contain the main loop of the simulation, which updates the model
+     * and the view at each iteration. The loop should check if the simulation is
+     * paused or stopped and act accordingly. The loop should also check if the
+     * simulation is paused and wait for the resume signal before continuing.
+     */
     public abstract void runSimulation();
 
 }

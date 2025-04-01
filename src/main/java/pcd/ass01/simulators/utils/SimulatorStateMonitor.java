@@ -12,7 +12,7 @@ public class SimulatorStateMonitor {
     public synchronized void resumeSimulation() {
         if (isPaused) {
             isPaused = false;
-            notify();
+            this.notifyAll();
         }
     }
 
@@ -20,7 +20,7 @@ public class SimulatorStateMonitor {
         if (!isStopped) {
             isStopped = true;
             if (isPaused) {
-                notify();
+                this.notifyAll();
             }
         }
     }
@@ -32,5 +32,4 @@ public class SimulatorStateMonitor {
     public synchronized boolean isPaused() {
         return isPaused;
     }
-
 }

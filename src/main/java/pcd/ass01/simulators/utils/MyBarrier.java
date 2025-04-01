@@ -1,10 +1,15 @@
 package pcd.ass01.simulators.utils;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class MyBarrier {
 
     private volatile int count = 0;
     private final int totalThreads;
-    private volatile Object layer = new Object();
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition condition = lock.newCondition();
+    private Object layer = new Object(); // Used to track the current layer of threads
 
     public MyBarrier(int totalThreads) {
         this.totalThreads = totalThreads;
@@ -18,18 +23,18 @@ public class MyBarrier {
      * @throws InterruptedException if the current thread is interrupted while waiting
      */
     public void await() throws InterruptedException {
-        final var localLayer = this.layer;
-        synchronized (this) {
+        lock.lock();
+        final Object localLayer = this.layer; // Get the current layer
             count++;
             if (count == totalThreads) {
                 count = 0; // Reset for next use
                 this.layer = new Object(); // Create a new lock for the next barrier
-                this.notifyAll(); // Notify all waiting threads
+                condition.signalAll(); // Notify all waiting threads
             } else {
                 while (localLayer == this.layer) { // Wait until the barrier is released
-                    this.wait(); // Wait until all threads reach the barrier
+                    condition.await(); // Wait until all threads reach the barrier
                 }
             }
-        }
+        lock.unlock();
     }
 }

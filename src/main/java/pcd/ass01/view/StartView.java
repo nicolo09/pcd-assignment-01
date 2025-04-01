@@ -16,22 +16,13 @@ import pcd.ass01.simulators.BoidsSerialSimulator;
 import pcd.ass01.simulators.BoidsSimulator;
 import pcd.ass01.simulators.BoidsTasksSimulator;
 import pcd.ass01.simulators.BoidsVirtualThreadsSimulator;
+import pcd.ass01.BoidsSimulation;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class StartView {
-
-    final static double SEPARATION_WEIGHT = 1.0;
-    final static double ALIGNMENT_WEIGHT = 1.0;
-    final static double COHESION_WEIGHT = 1.0;
-
-    final static int ENVIRONMENT_WIDTH = 1000;
-    final static int ENVIRONMENT_HEIGHT = 1000;
-    static final double MAX_SPEED = 4.0;
-    static final double PERCEPTION_RADIUS = 50.0;
-    static final double AVOID_RADIUS = 20.0;
 
     final static int SCREEN_WIDTH = 800;
     final static int SCREEN_HEIGHT = 800;
@@ -95,7 +86,7 @@ public class StartView {
                     });
                     return;
                 }
-                BoidsModel model = createModel(nBoids);
+                BoidsModel model = BoidsSimulation.createModel(nBoids);
                 BoidsSimulator sim = null;
                 if (e.getSource().equals(startSerialButton)) {
                     sim = new BoidsSerialSimulator(model);
@@ -117,16 +108,6 @@ public class StartView {
 
         startFrame.setContentPane(cp);
         startFrame.setVisible(true);
-    }
-
-    private BoidsModel createModel(int nBoids) {
-        return new BoidsModel(
-                nBoids,
-                SEPARATION_WEIGHT, ALIGNMENT_WEIGHT, COHESION_WEIGHT,
-                ENVIRONMENT_WIDTH, ENVIRONMENT_HEIGHT,
-                MAX_SPEED,
-                PERCEPTION_RADIUS,
-                AVOID_RADIUS);
     }
 
     public static Thread getThread(BoidsSimulator sim, BoidsModel model, JFrame startFrame) {

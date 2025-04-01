@@ -28,7 +28,7 @@ public class BoidsVirtualThreadsSimulator extends BoidsSimulator {
         }
 
         var t0 = System.currentTimeMillis();
-        while (!this.isStopped()) {
+        while (!this.getStateMonitor().isStopped()) {
             localModel = new BoidsModel(this.getModel());
             for (BoidUpdateVirtualThreadsRunnable runnable : runnables) {
                 runnable.setBoidModel(localModel);
@@ -75,10 +75,12 @@ public class BoidsVirtualThreadsSimulator extends BoidsSimulator {
             }
 
             // Pause simulation if requested
-            while (this.isPaused()) {
-                try {
-                    wait();
-                } catch (Exception ex) {
+            while (this.getStateMonitor().isPaused()) {
+                synchronized (this.getStateMonitor()) {
+                    try {
+                        this.getStateMonitor().wait();
+                    } catch (Exception ex) {
+                    }
                 }
             }
         }

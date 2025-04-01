@@ -5,40 +5,13 @@ import pcd.ass01.model.BoidsModel;
 
 public class BoidsSerialSimulator extends BoidsSimulator {
 
-    private volatile boolean isPaused = false;
-    private volatile boolean isStopped = false;
-
     public BoidsSerialSimulator(BoidsModel model) {
         super(model);
     }
 
-    public synchronized void pauseSimulation() {
-        isPaused = true;
-    }
-
-    public synchronized void resumeSimulation() {
-        if (isPaused) {
-            isPaused = false;
-            notify();
-        }
-    }
-
-    public synchronized void stopSimulation() {
-        if (!isStopped) {
-            isStopped = true;
-            if (isPaused) {
-                notify();
-            }
-        }
-    }
-
-    public synchronized boolean isStopped() {
-        return isStopped;
-    }
-
     public void runSimulation() {
         int framerate = 0;
-        while (!isStopped()) {
+        while (!this.getStateMonitor().isStopped()) {
             var t0 = System.currentTimeMillis();
             var boids = this.getModel().getBoids();
 
@@ -74,10 +47,10 @@ public class BoidsSerialSimulator extends BoidsSimulator {
             }
 
             // Pause simulation if requested
-            synchronized (this) {
-                while (isPaused) {
+            while (this.getStateMonitor().isPaused()) {
+                synchronized (this.getStateMonitor()) {
                     try {
-                        wait();
+                        this.getStateMonitor().wait();
                     } catch (Exception ex) {
                     }
                 }

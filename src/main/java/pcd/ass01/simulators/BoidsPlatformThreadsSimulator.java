@@ -29,7 +29,7 @@ public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
         threads.forEach(Thread::start);
 
         var t0 = System.currentTimeMillis();
-        while (!this.isStopped()) {
+        while (!this.getStateMonitor().isStopped()) {
             runnables.forEach(runnable -> runnable.setModel(new BoidsModel(this.getModel())));
 
             try {
@@ -70,10 +70,12 @@ public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
             }
 
             // Pause simulation if requested
-            while (this.isPaused()) {
-                try {
-                    wait();
-                } catch (Exception ex) {
+            while (this.getStateMonitor().isPaused()) {
+                synchronized (this.getStateMonitor()) {
+                    try {
+                        this.getStateMonitor().wait();
+                    } catch (Exception ex) {
+                    }
                 }
             }
         }
