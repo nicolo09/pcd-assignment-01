@@ -20,11 +20,13 @@ public class MyBarrier {
      * It will block until all threads have called this method.
      * After all threads have called this method, they will be released.
      *
-     * @throws InterruptedException if the current thread is interrupted while waiting
+     * @throws InterruptedException if the current thread is interrupted while
+     *                              waiting
      */
     public void await() throws InterruptedException {
         lock.lock();
-        final Object localLayer = this.layer; // Get the current layer
+        try {
+            final Object localLayer = this.layer; // Get the current layer
             count++;
             if (count == totalThreads) {
                 count = 0; // Reset for next use
@@ -35,6 +37,8 @@ public class MyBarrier {
                     condition.await(); // Wait until all threads reach the barrier
                 }
             }
-        lock.unlock();
+        } finally {
+            lock.unlock();
+        }
     }
 }
