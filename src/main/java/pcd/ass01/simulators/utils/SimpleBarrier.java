@@ -3,7 +3,7 @@ package pcd.ass01.simulators.utils;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MyBarrier {
+public class SimpleBarrier {
 
     private volatile int count = 0;
     private final int totalThreads;
@@ -11,7 +11,7 @@ public class MyBarrier {
     private final Condition condition = lock.newCondition();
     private Object layer = new Object(); // Used to track the current layer of threads
 
-    public MyBarrier(int totalThreads) {
+    public SimpleBarrier(int totalThreads) {
         this.totalThreads = totalThreads;
     }
 

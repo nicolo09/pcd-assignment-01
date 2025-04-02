@@ -4,15 +4,15 @@ import java.util.List;
 
 import pcd.ass01.model.Boid;
 import pcd.ass01.model.BoidsModel;
-import pcd.ass01.simulators.utils.MyBarrier;
+import pcd.ass01.simulators.utils.SimpleBarrier;
 
 public class BoidPlatformThreadsUpdateRunnable implements Runnable {
 
     private final List<Boid> boids;
     private BoidsModel model;
-    private final MyBarrier barrier;
+    private final SimpleBarrier barrier;
 
-    public BoidPlatformThreadsUpdateRunnable(List<Boid> boids, MyBarrier barrier) {
+    public BoidPlatformThreadsUpdateRunnable(List<Boid> boids, SimpleBarrier barrier) {
         this.boids = boids;
         this.barrier = barrier;
     }

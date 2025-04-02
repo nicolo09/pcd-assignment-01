@@ -6,7 +6,7 @@ import org.apache.commons.collections4.ListUtils;
 
 import pcd.ass01.model.Boid;
 import pcd.ass01.model.BoidsModel;
-import pcd.ass01.simulators.utils.MyBarrier;
+import pcd.ass01.simulators.utils.SimpleBarrier;
 
 public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
 
@@ -21,7 +21,7 @@ public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
 
         List<List<Boid>> threadBoids = ListUtils.partition(boids,
                 boids.size() / Runtime.getRuntime().availableProcessors());
-        MyBarrier barrier = new MyBarrier(threadBoids.size() + 1);
+        SimpleBarrier barrier = new SimpleBarrier(threadBoids.size() + 1);
         List<BoidPlatformThreadsUpdateRunnable> runnables = threadBoids.stream()
                 .map(boidsList -> new BoidPlatformThreadsUpdateRunnable(boidsList, barrier)).toList();
         List<Thread> threads = runnables.stream()

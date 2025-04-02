@@ -5,7 +5,7 @@ import java.util.List;
 
 import pcd.ass01.model.Boid;
 import pcd.ass01.model.BoidsModel;
-import pcd.ass01.simulators.utils.MyBarrier;
+import pcd.ass01.simulators.utils.SimpleBarrier;
 
 public class BoidsVirtualThreadsSimulator extends BoidsSimulator {
 
@@ -16,14 +16,13 @@ public class BoidsVirtualThreadsSimulator extends BoidsSimulator {
     public void runSimulation() {
         int framerate = 0;
         var boids = this.getModel().getBoids();
-        final MyBarrier barrier = new MyBarrier(boids.size() + 1);
-        final MyBarrier modelBarrier = new MyBarrier(boids.size() + 1);
+        final SimpleBarrier barrier = new SimpleBarrier(boids.size() + 1);
         BoidsModel localModel = null;
         List<BoidUpdateVirtualThreadsRunnable> runnables = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();
 
         for (Boid boid : boids) {
-            runnables.add(new BoidUpdateVirtualThreadsRunnable(boid, barrier, modelBarrier));
+            runnables.add(new BoidUpdateVirtualThreadsRunnable(boid, barrier));
             threads.add(Thread.ofVirtual().start(runnables.get(runnables.size() - 1)));
         }
 
@@ -35,7 +34,7 @@ public class BoidsVirtualThreadsSimulator extends BoidsSimulator {
             }
 
             try {
-                modelBarrier.await();
+                barrier.await();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

@@ -2,19 +2,17 @@ package pcd.ass01.simulators;
 
 import pcd.ass01.model.Boid;
 import pcd.ass01.model.BoidsModel;
-import pcd.ass01.simulators.utils.MyBarrier;
+import pcd.ass01.simulators.utils.SimpleBarrier;
 
 public class BoidUpdateVirtualThreadsRunnable implements Runnable {
 
     private final Boid boid;
     private BoidsModel localModel;
-    private final MyBarrier updateBarrier; // barrier for updating velocity and position
-    private final MyBarrier modelBarrier; // barrier for updating the model
+    private final SimpleBarrier barrier; // barrier for updating velocity and position
 
-    public BoidUpdateVirtualThreadsRunnable(Boid boid, MyBarrier barrier, MyBarrier modelBarrier) {
+    public BoidUpdateVirtualThreadsRunnable(Boid boid, SimpleBarrier barrier) {
         this.boid = boid;
-        this.updateBarrier = barrier;
-        this.modelBarrier = modelBarrier;
+        this.barrier = barrier;
     }
 
     public void setBoidModel(BoidsModel model) {
@@ -28,19 +26,19 @@ public class BoidUpdateVirtualThreadsRunnable implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                modelBarrier.await();
+                barrier.await();
             } catch (Exception ex) {
                 return;
             }
             boid.updateVelocity(localModel);
             try {
-                updateBarrier.await();
+                barrier.await();
             } catch (Exception ex) {
                 return;
             }
             boid.updatePos(localModel);
             try {
-                updateBarrier.await();
+                barrier.await();
             } catch (Exception ex) {
                 return;
             }
