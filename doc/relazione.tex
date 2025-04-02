@@ -60,18 +60,58 @@ iterazione.
 
 L'iterazione inizia perciò con i thread bloccati da una barriera in attesa che il main assegni a ciascuno una copia del model. Il main sblocca poi la barrier e ogni
 thread esegue l'aggiornamento delle velocità concorrentemente al disegno della view da parte del main thread (le velocità non vengono lette durante l'aggiornamento della view).
-A questo punto i thread si bloccano nuovamente in barrier in modo che possano proseguire solo quando tutti hanno aggiornato le velocità e il main la view. Una volta superata la barriera
-aggiornano le posizioni dei Boids e si sincronizzano nuovamente su una barriera.
+A questo punto i thread si bloccano nuovamente su una barriera in modo che possano proseguire solo quando tutti hanno aggiornato le velocità dei propri boid e il main ha aggiornato
+la view. Aggiornano quindi le posizioni dei Boids e si bloccano nuovamente sulla barriera. A questo punto il main thread controlla se la simulazione deve essere fermata per un comando
+di pause o stop e se non è così sblocca i thread per l'iterazione successiva.
 
+In caso di stop il main thread esegue l'interrupt di tutti i worker threads che terminano l'esecuzione e il main thread termina la simulazione facendo il join di tutti i worker.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Petri net 1.png}
+    \caption{Petri net della soluzione Platform Threads.}
+    \label{fig:platform-threads-diagram}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{P0}: il main all'inizio.
+    \item \textbf{T0}: l'azione di creazione dei thread.
+    \item \textbf{P1}: il main dopo aver creato i thread.
+    \item \textbf{P2} e \textbf{P3}: 2 worker thread appena creati.
+    \item \textbf{T1}: l'azione di assegnazione del model ai thread.
+    \item \textbf{P4}: il main dopo aver assegnato il model ai thread.
+    \item \textbf{P5}: il main dopo aver sbloccato i thread.
+    \item \textbf{T2}: l'azione di aggiornamento delle velocità dei boids.
+    \item \textbf{P6} e \textbf{P7}: i worker thread dopo aver aggiornato le velocità dei boids.
+    \item \textbf{T3}: l'azione di aggiornamento della view.
+    \item \textbf{P8}: il main dopo aver aggiornato la view.
+    \item \textbf{T4}: l'azione di aggiornamento delle posizioni dei boids.
+    \item \textbf{P9}: il main dopo che i thread hanno aggiornato le posizioni.
+    \item \textbf{P10} e \textbf{P11}: i worker thread dopo aver aggiornato le posizioni dei boids.
+    \item \textbf{T5}: l'azione di sblocco dei thread per l'iterazione successiva.
+\end{itemize}
+\newpage
 \section{Task-based}
+La soluzione task-based è stata implementata utilizzando l'API Java Executor Framework. All'inizio della funzione \textsf{runSimulation()} viene creato un 
+\textsf{ExecutorService} di tipo \textsf{FixedThreadPool} con un numero di thread pari al numero di processori della macchina aumentato di 1.
+Il main si occupa di creare i task di aggiornamento delle velocity e di sottometterli all'\textsf{ExecutorService}, ne attende quindi il completamento 
+chiamando il get sull'oggetto \textsf{Future} di ogni task. Mette quindi in coda i task di aggiornamento delle posizioni e attende il completamento anche di 
+questi. Il main aggiorna quindi la view, controlla se la simulazione deve essere fermata o messa in pausa e in caso negativo procede con l'iterazione successiva.
+Nel caso in cui la simulazione debba essere fermata il main chiama il metodo \textsf{shutdown()} sull'\textsf{ExecutorService} e termina la simulazione.
 
 \section{Virtual Threads}
+La soluzione basata su virtual threads è stata implementata utilizzando un singolo virtual thread per ogni boid. Questo è possibile
+grazie al fatto che i virtual threads sono molto leggeri e possono essere creati in un numero molto maggiore rispetto ai platform threads.
+Il main thread crea quindi un virtual thread per ogni boid e lo esegue. Il loop si svolge in modo simile alla soluzione basata su platform threads con gli stessi punti
+di sincronizzazione ottenuta attraverso una barriera.
 
 \section{Dettagli implementativi}
-\subsection{MyBarrier}
-La classe \textsf{MyBarrier} implementa una semplice barriera per la sincronizzazione fra thread. Contiene una \textsf{Condition} su cui i threads che chiamano
+\subsection{SimpleBarrier}
+La classe \textsf{SimpleBarrier} implementa una semplice barriera per la sincronizzazione fra thread. Contiene una \textsf{Condition} su cui i threads che chiamano
 \textsf{await} si mettono in attesa dopo aver incrementato un contatore, quando il contatore raggiunge il numero di threads che devono passare la barriera, il 
 thread che ha incrementato il contatore per ultimo lo resetta e sveglia tutti chiamando \textsf{signalAll} sull'oggetto \textsf{Condition}.
 La classe è resa thread-safe mediante un \textsf{ReentrantLock}.
+
+\section{Verifica JPF della versione Platform Threads}
 
 \end{document}
