@@ -25,9 +25,9 @@
 \title{Programmazione concorrente e distribuita \\ Assignment 01}
 
 \author{
-    \href{mailto:nicolo.guerra@studio.unibo.it}{Nicolò Guerra, matricola }
+    \href{mailto:nicolo.guerra@studio.unibo.it}{Nicolò Guerra, matricola 0001179571}
     \href{mailto:filippo.casadei9@studio.unibo.it}{Filippo Casadei, matricola 0001179572}
-    \href{mailto:emma.leonardi2@studio.unibo.it}{Emma Leonardi, matricola }
+    \href{mailto:emma.leonardi2@studio.unibo.it}{Emma Leonardi, matricola 0001193227}
     }
 \date{\today}
 
@@ -35,8 +35,15 @@
 \maketitle
 \renewcommand{\thesection}{\arabic{section}}
 \section{Analisi del problema}
-Il problema riguarda la parallelizzazione dell'algoritmo Boids. Le soluzioni proposte sono tre diverse implementazioni, ognuna delle quali sfrutta un diverso approccio di 
-programmazione concorrente. 
+Il problema riguarda la parallelizzazione dell'algoritmo Boids. La parte su cui si è concentrata la parallelizzazione è quella del calcolo delle velocità e delle posizioni dei 
+boids. Dato che il calcolo delle posizioni richiede la lettura delle velocità è necessario un qualche tipo di sincronizzazione tra le due attività per evitare corse critiche.
+Inoltre l'aggiornamento della view richiede la sola lettura delle posizioni dei boid, perciò può lavorare in parallelo con l'aggiornamento delle velocità ma non delle posizioni dei boid.
+Attualmente la versione sequenziale aggiorna i boid uno di seguito all'altro senza effettuare un istantanea del modello all'inizio di ogni iterazione. Questo comporta che i boid,
+il cui aggiornamento si basa sui valori delle posizioni e velocità dei boid vicini, possano basare i propri dati su altri in parte aggiornati e in parte no. Questo non è un grosso
+problema per la versione sequenziale mentre nella versione concorrente potrebbe portare a risultati non corretti, o in caso di sincronizzazione errata a deadlock, ma anche nel caso di
+sincronizzazione corretta comporterebbe lunghi periodi di attesa e un basso livello di parallelismo, per questo si è deciso di lavorare ad ogni iterazione su una copia del model che ne 
+rappresenta l'istantanea all'inizio del ciclo corrente.
+Le soluzioni proposte sono tre diverse implementazioni, ognuna delle quali sfrutta un diverso approccio di programmazione concorrente. 
 Le tre soluzioni sono: 
 \begin{itemize}
     \item \textbf{Platform Threads}: utilizza i platform threads del sistema operativo per parallelizzare l'algoritmo.
@@ -90,6 +97,9 @@ In caso di stop il main thread esegue l'interrupt di tutti i worker threads che 
     \item \textbf{P10} e \textbf{P11}: i worker thread dopo aver aggiornato le posizioni dei boids.
     \item \textbf{T5}: l'azione di sblocco dei thread per l'iterazione successiva.
 \end{itemize}
+
+\subsection{Analisi prestazioni}
+
 \newpage
 \section{Task-based}
 La soluzione task-based è stata implementata utilizzando l'API Java Executor Framework. All'inizio della funzione \textsf{runSimulation()} viene creato un 
@@ -98,6 +108,7 @@ Il main si occupa di creare i task di aggiornamento delle velocity e di sottomet
 chiamando il get sull'oggetto \textsf{Future} di ogni task. Mette quindi in coda i task di aggiornamento delle posizioni e attende il completamento anche di 
 questi. Il main aggiorna quindi la view, controlla se la simulazione deve essere fermata o messa in pausa e in caso negativo procede con l'iterazione successiva.
 Nel caso in cui la simulazione debba essere fermata il main chiama il metodo \textsf{shutdown()} sull'\textsf{ExecutorService} e termina la simulazione.
+\subsection{Analisi prestazioni}
 
 \section{Virtual Threads}
 La soluzione basata su virtual threads è stata implementata utilizzando un singolo virtual thread per ogni boid. Questo è possibile
@@ -106,6 +117,11 @@ Il main thread crea quindi un virtual thread per ogni boid e lo esegue. Il loop 
 di sincronizzazione ottenuta attraverso una barriera.
 
 \section{Dettagli implementativi}
+\subsection{SimulatorStateMonitor}
+La classe \textsf{SimulatorStateMonitor} contiene lo stato della simulazione e i metodi per fermarla e avviarla. Tutti i metodi sono \textsf{synchronized} per evitare
+corse critiche. Quando viene chiamato uno tra i due metodi \textsf{resume} o \textsf{stop} oltre all'aggiornamento dei flag viene chiamato \textsf{notifyAll} in modo
+che i thread in attesa su questo oggetto possano riprendere l'esecuzione.
+
 \subsection{SimpleBarrier}
 La classe \textsf{SimpleBarrier} implementa una semplice barriera per la sincronizzazione fra thread. Contiene una \textsf{Condition} su cui i threads che chiamano
 \textsf{await} si mettono in attesa dopo aver incrementato un contatore, quando il contatore raggiunge il numero di threads che devono passare la barriera, il 
@@ -113,5 +129,20 @@ thread che ha incrementato il contatore per ultimo lo resetta e sveglia tutti ch
 La classe è resa thread-safe mediante un \textsf{ReentrantLock}.
 
 \section{Verifica JPF della versione Platform Threads}
+Una prima verifica della versione Platform Threads effettuata con Java Path Finder ha mostrato la presenza di un possibile deadlock dovuto all'assenza di un blocco try-finally
+nel metodo \textsf{await} della \textsf{SimpleBarrier}. Questo comportava un rischio di deadlock in caso di interruzione del thread quando questo era in attesa sulla condition, perché 
+lanciando eccezione non avrebbe mai rilasciato il lock.
+Risolto questo problema l'esecuzione di Java Path Finder non ha trovato ulteriori problemi.
+Sono riportate le statistiche di esecuzione della verifica:
+\begin{verbatim}
+states:             new=32414479, visited=63876782, backtracked=96291261, end=10
+search:             maxDepth=1606, constraints=0
+choice generators:  thread=32414478 (signal=0, lock=676529, sharedRef=28821190, 
+                    threadApi=180, reschedule=2789380), data=0
+heap:               new=7400851, released=8790839, maxLive=1369, gcCycles=93268219
+instructions:       1574428373
+max memory:         1708MB
+loaded code:        classes=188, methods=3966
+\end{verbatim}
 
 \end{document}
