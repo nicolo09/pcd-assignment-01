@@ -25,8 +25,8 @@
 \title{Programmazione concorrente e distribuita \\ Assignment 01}
 
 \author{
-    \href{mailto:nicolo.guerra@studio.unibo.it}{Nicolò Guerra, matricola 0001179571}
-    \href{mailto:filippo.casadei9@studio.unibo.it}{Filippo Casadei, matricola 0001179572}
+    \href{mailto:nicolo.guerra@studio.unibo.it}{Nicolò Guerra, matricola 0001179571} \\
+    \href{mailto:filippo.casadei9@studio.unibo.it}{Filippo Casadei, matricola 0001179572} \\
     \href{mailto:emma.leonardi2@studio.unibo.it}{Emma Leonardi, matricola 0001193227}
     }
 \date{\today}
@@ -97,9 +97,6 @@ In caso di stop il main thread esegue l'interrupt di tutti i worker threads che 
     \item \textbf{P10} e \textbf{P11}: i worker thread dopo aver aggiornato le posizioni dei boids.
     \item \textbf{T5}: l'azione di sblocco dei thread per l'iterazione successiva.
 \end{itemize}
-
-\subsection{Analisi prestazioni}
-
 \newpage
 \section{Task-based}
 La soluzione task-based è stata implementata utilizzando l'API Java Executor Framework. All'inizio della funzione \textsf{runSimulation()} viene creato un 
@@ -127,6 +124,33 @@ La classe \textsf{SimpleBarrier} implementa una semplice barriera per la sincron
 \textsf{await} si mettono in attesa dopo aver incrementato un contatore, quando il contatore raggiunge il numero di threads che devono passare la barriera, il 
 thread che ha incrementato il contatore per ultimo lo resetta e sveglia tutti chiamando \textsf{signalAll} sull'oggetto \textsf{Condition}.
 La classe è resa thread-safe mediante un \textsf{ReentrantLock}.
+
+\section{Performance}
+
+\subsection{Prestazioni}
+% TODO: prestazioni
+
+\subsection{Scalabilità}
+Le varie implementazioni risultano scalabili dato che, aumentando il numero di core disponibili, il programma riesce a gestire un numero sempre maggiore di boids senza far calare le prestazioni.
+In particolare la versione che sfrutta i Platform Threads e la versione Task-Based beneficiano maggiormente dell'aumento del numero di core, mentre la versione che sfrutta i Virtual Threads mostra un incremento più contenuto.
+
+Per misurare la scalabilità sono stati eseguiti dei test variando sia il numero di boids che il numero di core utilizzati, seguono le configurazioni testate con il numero di boids che riescono a gestire fluidamente:
+\begin{verbatim}
+sfruttando 28 core:
+                Platform Threads: 14000 boids
+                Task-Based: 14000 boids
+                Virtual Threads: 10000 boids
+sfruttando 16 core:
+                Platform Threads: 11000 boids 
+                Task-Based: 11000 boids
+sfruttando 8 core:
+                Platform Threads: 8000 boids 
+                Task-Based: 8000 boids
+sfruttando 4 core:
+                Platform Threads: 6000 boids 
+                Task-Based: 6000 boids
+\end{verbatim}
+
 
 \section{Verifica JPF della versione Platform Threads}
 Una prima verifica della versione Platform Threads effettuata con Java Path Finder ha mostrato la presenza di un possibile deadlock dovuto all'assenza di un blocco try-finally
