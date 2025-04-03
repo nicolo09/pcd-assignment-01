@@ -20,7 +20,7 @@ public class BoidsPlatformThreadsSimulator extends BoidsSimulator {
         var boids = this.getModel().getBoids();
 
         List<List<Boid>> threadBoids = ListUtils.partition(boids,
-                boids.size() / Runtime.getRuntime().availableProcessors());
+                boids.size() / (Runtime.getRuntime().availableProcessors() + 1));
         SimpleBarrier barrier = new SimpleBarrier(threadBoids.size() + 1);
         List<BoidPlatformThreadsUpdateRunnable> runnables = threadBoids.stream()
                 .map(boidsList -> new BoidPlatformThreadsUpdateRunnable(boidsList, barrier)).toList();
