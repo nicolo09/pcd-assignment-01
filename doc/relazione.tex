@@ -105,7 +105,6 @@ Il main si occupa di creare i task di aggiornamento delle velocity e di sottomet
 chiamando il get sull'oggetto \textsf{Future} di ogni task. Mette quindi in coda i task di aggiornamento delle posizioni e attende il completamento anche di 
 questi. Il main aggiorna quindi la view, controlla se la simulazione deve essere fermata o messa in pausa e in caso negativo procede con l'iterazione successiva.
 Nel caso in cui la simulazione debba essere fermata il main chiama il metodo \textsf{shutdown()} sull'\textsf{ExecutorService} e termina la simulazione.
-\subsection{Analisi prestazioni}
 
 \section{Virtual Threads}
 La soluzione basata su virtual threads è stata implementata utilizzando un singolo virtual thread per ogni boid. Questo è possibile
@@ -125,33 +124,6 @@ La classe \textsf{SimpleBarrier} implementa una semplice barriera per la sincron
 thread che ha incrementato il contatore per ultimo lo resetta e sveglia tutti chiamando \textsf{signalAll} sull'oggetto \textsf{Condition}.
 La classe è resa thread-safe mediante un \textsf{ReentrantLock}.
 
-\section{Performance}
-
-\subsection{Prestazioni}
-% TODO: prestazioni
-
-\subsection{Scalabilità}
-Le varie implementazioni risultano scalabili dato che, aumentando il numero di core disponibili, il programma riesce a gestire un numero sempre maggiore di boids senza far calare le prestazioni.
-In particolare la versione che sfrutta i Platform Threads e la versione Task-Based beneficiano maggiormente dell'aumento del numero di core, mentre la versione che sfrutta i Virtual Threads mostra un incremento più contenuto.
-
-Per misurare la scalabilità sono stati eseguiti dei test variando sia il numero di boids che il numero di core utilizzati, seguono le configurazioni testate con il numero di boids che riescono a gestire fluidamente:
-\begin{verbatim}
-sfruttando 28 core:
-                Platform Threads: 14000 boids
-                Task-Based: 14000 boids
-                Virtual Threads: 10000 boids
-sfruttando 16 core:
-                Platform Threads: 11000 boids 
-                Task-Based: 11000 boids
-sfruttando 8 core:
-                Platform Threads: 8000 boids 
-                Task-Based: 8000 boids
-sfruttando 4 core:
-                Platform Threads: 6000 boids 
-                Task-Based: 6000 boids
-\end{verbatim}
-
-
 \section{Verifica JPF della versione Platform Threads}
 Una prima verifica della versione Platform Threads effettuata con Java Path Finder ha mostrato la presenza di un possibile deadlock dovuto all'assenza di un blocco try-finally
 nel metodo \textsf{await} della \textsf{SimpleBarrier}. Questo comportava un rischio di deadlock in caso di interruzione del thread quando questo era in attesa sulla condition, perché 
@@ -168,5 +140,183 @@ instructions:       1574428373
 max memory:         1708MB
 loaded code:        classes=188, methods=3966
 \end{verbatim}
+
+\section{Performance}
+
+\subsection{Misurazioni}
+
+Per valutare le prestazioni delle varie implementazioni si è utilizzata come metrica gli FPS (Frame per second) medi dell'esecuzione di 500 iterazioni di aggiornamento.
+Ogni versione è stata fatta girare più volte con un diverso numero di boids e, senza contare la versione seriale, utilizzando tutti i core disponibili.
+Nel seguente grafico sono riportati gli FPS medi in base al numero di boids per ogni versione:
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=16cm, height=10cm,
+            xlabel={Numero di Boids},
+            ylabel={FPS medi},
+            legend pos=north east,
+            grid=both,
+            xtick=data,
+            ymin=0,
+            ymax=350,
+            ymajorgrids=true,
+            xmajorgrids=true,
+            grid style=dashed,
+            scaled x ticks=false,
+        ]
+        % Serial Simulation
+        \addplot[
+            color=red,
+            mark=square,
+            thick
+        ] coordinates {
+            (3000, 32.066)
+            (5000, 11.540)
+            (8000, 4.625)
+            (10000, 2.594)
+            (12000, 1.116)
+            (14000, 1.078)
+        };
+        \addlegendentry{Serial Simulation}
+
+        % Platform Threads Simulation
+        \addplot[
+            color=blue,
+            mark=triangle,
+            thick
+        ] coordinates {
+            (3000, 260.960)
+            (5000, 83.514)
+            (8000, 48.723)
+            (10000, 32.624)
+            (12000, 20.029)
+            (14000, 7.000)
+        };
+        \addlegendentry{Platform Threads Simulation}
+
+        % Task-Based Simulation
+        \addplot[
+            color=green,
+            mark=o,
+            thick
+        ] coordinates {
+            (3000, 333.111)
+            (5000, 111.111)
+            (8000, 63.468)
+            (10000, 40.727)
+            (12000, 24.397)
+            (14000, 8.452)
+        };
+        \addlegendentry{Task-Based Simulation}
+
+        % Virtual Threads Simulation
+        \addplot[
+            color=purple,
+            mark=diamond,
+            thick
+        ] coordinates {
+            (3000, 277.932)
+            (5000, 83.486)
+            (8000, 48.454)
+            (10000, 31.996)
+            (12000, 19.908)
+            (14000, 7.007)
+        };
+        \addlegendentry{Virtual Threads Simulation}
+
+        \end{axis}
+    \end{tikzpicture}
+    \caption{FPS medi in base al numero di Boids.}
+\end{figure}
+
+\subsection{Scalabilità}
+Le varie implementazioni risultano scalabili dato che, aumentando il numero di core disponibili, il programma riesce a gestire un numero sempre maggiore di boids senza far calare le prestazioni.
+In particolare la versione che sfrutta i Platform Threads e la versione Task-Based beneficiano maggiormente dell'aumento del numero di core, mentre la versione che sfrutta i Virtual Threads mostra un incremento più contenuto.
+
+Per misurare la scalabilità sono stati eseguiti dei test variando il numero di core utilizzati, seguono le configurazioni testate e per ogni versione la quantità massima di Boids che permette al programma di restare a 25 FPS medi
+sempre su 500 iterazioni:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Numero di Core} & \textbf{Platform Threads (Boids)} & \textbf{Task-Based (Boids)} \\
+        \hline
+        28 & 11500 & 12500 \\
+        \hline
+        16 & 9800 & 10200 \\
+        \hline
+        8  & 8700 & 8900 \\
+        \hline
+        4  & 7300 & 7500 \\
+        \hline
+        2  & 5000 & 5500 \\
+        \hline
+    \end{tabular}
+    \caption{Numero massimo di Boids a 25 FPS medi in base al numero di core.}
+    \label{tab:boids-performance}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=16cm, height=10cm,
+            xlabel={Numero di Core},
+            ylabel={Numero massimo di Boids a 25 FPS medi},
+            legend pos=north west,
+            grid=both,
+            xtick=data,
+            ymin=0,
+            ymajorgrids=true,
+            xmajorgrids=true,
+            grid style=dashed,
+            scaled y ticks=false,
+            scaled x ticks=false,
+        ]
+        % Platform Threads
+        \addplot[
+            color=blue,
+            mark=square,
+            thick
+        ] coordinates {
+            (2, 5000)
+            (4, 7300)
+            (8, 8700)
+            (16, 9800)
+            (28, 11500)
+        };
+        \addlegendentry{Platform Threads}
+
+        % Task-Based
+        \addplot[
+            color=green,
+            mark=triangle,
+            thick
+        ] coordinates {
+            (2, 5500)
+            (4, 7500)
+            (8, 8900)
+            (16, 10200)
+            (28, 12500)
+        };
+        \addlegendentry{Task-Based}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Numero massimo di Boids a 25 FPS medi in base al numero di core disponibili.}
+    \label{fig:scalability-graph}
+\end{figure}
+
+Lo scaling, come si può osservare dal grafico, non è lineare, questo è dovuto alla porzione non parallelizzabile del programma.
+
+\section{Conclusioni}
+
+La versione seriale scende sotto i 25 FPS già a 5000 boids, mentre le versioni concorrenti riescono a mantenere un buon numero di FPS medi anche con 10000-12000 Boids.
+Fra le versioni concorrenti quella che si dimostra più performante è la versione Task-Based, che riesce a mantenere un numero di FPS medi seppur di poco maggiore rispetto alle altre due.
+Questo è probabilmente dovuto al fatto che lavorando a più alto livello si lascia lo spazio alle implementazioni sottostanti di operare ottimizzazioni anche a livello di VM.
+Si attestano circa sulle stesse prestazioni le versioni Platform Thread e Virtual Thread, il che dimostra quanto i virtual thread risultino più leggeri rispetto ai thread del sistema operativo, dato che ne vengono
+creati uno per boid e non si nota un calo di prestazioni rispetto alla versione Platform Thread.
 
 \end{document}
