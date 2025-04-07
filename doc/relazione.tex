@@ -79,7 +79,7 @@ In caso di stop il main thread esegue l'interrupt di tutti i worker threads che 
     \caption{Petri net della soluzione Platform Threads.}
     \label{fig:platform-threads-diagram}
 \end{figure}
-
+Come si vede nel diagramma della Petri Net in figura \ref{fig:platform-threads-diagram}, ci sono diversi passaggi nella soluzione con platform threads.
 \begin{itemize}
     \item \textbf{P0}: il main all'inizio.
     \item \textbf{T0}: l'azione di creazione dei thread.
@@ -147,7 +147,7 @@ loaded code:        classes=188, methods=3966
 
 Per valutare le prestazioni delle varie implementazioni si è utilizzata come metrica gli FPS (Frame per second) medi dell'esecuzione di 500 iterazioni di aggiornamento.
 Ogni versione è stata fatta girare più volte con un diverso numero di boids e, senza contare la versione seriale, utilizzando tutti i core disponibili.
-Nel seguente grafico sono riportati gli FPS medi in base al numero di boids per ogni versione:
+Nel grafico \ref{fig:performance} sono riportati gli FPS medi in base al numero di boids per ogni versione:
 
 \begin{figure}[H]
     \centering
@@ -229,6 +229,7 @@ Nel seguente grafico sono riportati gli FPS medi in base al numero di boids per 
         \end{axis}
     \end{tikzpicture}
     \caption{FPS medi in base al numero di Boids.}
+    \label{fig:performance}
 \end{figure}
 
 \subsection{Scalabilità}
@@ -236,7 +237,7 @@ Le varie implementazioni risultano scalabili dato che, aumentando il numero di c
 In particolare la versione che sfrutta i Platform Threads e la versione Task-Based beneficiano maggiormente dell'aumento del numero di core, mentre la versione che sfrutta i Virtual Threads mostra un incremento più contenuto.
 
 Per misurare la scalabilità sono stati eseguiti dei test variando il numero di core utilizzati, seguono le configurazioni testate e per ogni versione la quantità massima di Boids che permette al programma di restare a 25 FPS medi
-sempre su 500 iterazioni:
+sempre su 500 iterazioni. I risultati sono mostrati in tabella \ref{tab:boids-performance} e nel grafico \ref{fig:scalability-graph}.
 
 \begin{table}[H]
     \centering
@@ -309,7 +310,7 @@ sempre su 500 iterazioni:
     \label{fig:scalability-graph}
 \end{figure}
 
-Lo scaling, come si può osservare dal grafico, non è lineare, questo è dovuto alla porzione non parallelizzabile del programma.
+Lo scaling, come si può osservare dal grafico \ref{fig:scalability-graph}, non è lineare, questo è dovuto alla porzione non parallelizzabile del programma.
 
 \section{Conclusioni}
 
