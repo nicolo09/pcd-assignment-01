@@ -76,27 +76,51 @@ In caso di stop il main thread esegue l'interrupt di tutti i worker threads che 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{Petri net 1.png}
-    \caption{Petri net della soluzione Platform Threads.}
+    \caption{Petri net della soluzione Platform Threads con 2 worker.}
     \label{fig:platform-threads-diagram}
 \end{figure}
-Come si vede nel diagramma della Petri Net in figura \ref{fig:platform-threads-diagram}, ci sono diversi passaggi nella soluzione con platform threads.
-\begin{itemize}
-    \item \textbf{P0}: il main all'inizio.
-    \item \textbf{T0}: l'azione di creazione dei thread.
-    \item \textbf{P1}: il main dopo aver creato i thread.
-    \item \textbf{P2} e \textbf{P3}: 2 worker thread appena creati.
-    \item \textbf{T1}: l'azione di assegnazione del model ai thread.
-    \item \textbf{P4}: il main dopo aver assegnato il model ai thread.
-    \item \textbf{P5}: il main dopo aver sbloccato i thread.
-    \item \textbf{T2}: l'azione di aggiornamento delle velocità dei boids.
-    \item \textbf{P6} e \textbf{P7}: i worker thread dopo aver aggiornato le velocità dei boids.
-    \item \textbf{T3}: l'azione di aggiornamento della view.
-    \item \textbf{P8}: il main dopo aver aggiornato la view.
-    \item \textbf{T4}: l'azione di aggiornamento delle posizioni dei boids.
-    \item \textbf{P9}: il main dopo che i thread hanno aggiornato le posizioni.
-    \item \textbf{P10} e \textbf{P11}: i worker thread dopo aver aggiornato le posizioni dei boids.
-    \item \textbf{T5}: l'azione di sblocco dei thread per l'iterazione successiva.
-\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|l|}
+        \hline
+        \textbf{Stato/Transizione} & \multicolumn{1}{c|}{\textbf{Descrizione}} \\
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P0} & \multicolumn{1}{c|}{Il main all'inizio.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{T0} & \multicolumn{1}{c|}{L'azione di creazione dei thread.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P1} & \multicolumn{1}{c|}{Il main dopo aver creato i thread.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P2} e \textbf{P3} & \multicolumn{1}{c|}{2 worker thread appena creati.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{T1} & \multicolumn{1}{c|}{L'azione di assegnazione del model ai thread.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P4} & \multicolumn{1}{c|}{Il main dopo aver assegnato il model ai thread.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P5} & \multicolumn{1}{c|}{Il main dopo aver sbloccato i thread.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{T2} & \multicolumn{1}{c|}{L'azione di aggiornamento delle velocità dei boids.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P6} e \textbf{P7} & \multicolumn{1}{c|}{I worker thread dopo aver aggiornato le velocità dei boids.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{T3} & \multicolumn{1}{c|}{L'azione di aggiornamento della view.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P8} & \multicolumn{1}{c|}{Il main dopo aver aggiornato la view.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{T4} & \multicolumn{1}{c|}{L'azione di aggiornamento delle posizioni dei boids.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P9} & \multicolumn{1}{c|}{Il main dopo che i thread hanno aggiornato le posizioni.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{P10} e \textbf{P11} & \multicolumn{1}{c|}{I worker thread dopo aver aggiornato le posizioni dei boids.} \\[0.5ex]
+        \hline
+        \rule{0pt}{2.5ex} \textbf{T5} & \multicolumn{1}{c|}{L'azione di sblocco dei thread per l'iterazione successiva.} \\[0.5ex]
+        \hline
+    \end{tabular}
+    \caption{Descrizione degli stati e delle transizioni nella Petri Net \ref{fig:platform-threads-diagram}.}
+    \label{tab:petri-net-description}
+\end{table}
+
 \newpage
 \section{Task-based}
 La soluzione task-based è stata implementata utilizzando l'API Java Executor Framework. All'inizio della funzione \textsf{runSimulation()} viene creato un 
@@ -234,7 +258,6 @@ Nel grafico \ref{fig:performance} sono riportati gli FPS medi in base al numero 
 
 \subsection{Scalabilità}
 Le varie implementazioni risultano scalabili dato che, aumentando il numero di core disponibili, il programma riesce a gestire un numero sempre maggiore di boids senza far calare le prestazioni.
-In particolare la versione che sfrutta i Platform Threads e la versione Task-Based beneficiano maggiormente dell'aumento del numero di core, mentre la versione che sfrutta i Virtual Threads mostra un incremento più contenuto.
 
 Per misurare la scalabilità sono stati eseguiti dei test variando il numero di core utilizzati, seguono le configurazioni testate e per ogni versione la quantità massima di Boids che permette al programma di restare a 25 FPS medi
 sempre su 500 iterazioni. I risultati sono mostrati in tabella \ref{tab:boids-performance} e nel grafico \ref{fig:scalability-graph}.
